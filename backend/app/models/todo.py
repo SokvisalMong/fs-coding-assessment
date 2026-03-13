@@ -1,11 +1,14 @@
 import uuid
 from datetime import datetime
 from enum import Enum
+from typing import TYPE_CHECKING
 
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
 
 from app.schemas.mixin import TimeStampMixin
 
+if TYPE_CHECKING:
+    from app.models.user import User
 
 class Priority(str, Enum):
     LOW = "LOW"
@@ -31,3 +34,5 @@ class Todo(TodoBase, TimeStampMixin, table=True):
     id: uuid.UUID = Field(
         default_factory=uuid.uuid4, primary_key=True, index=True, nullable=False
     )
+    owner_id: uuid.UUID = Field(foreign_key="user.id", nullable=False, index=True)
+    owner: "User" = Relationship(back_populates="todos")
