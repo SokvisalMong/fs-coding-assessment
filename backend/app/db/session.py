@@ -14,10 +14,10 @@ engine = create_async_engine(
     settings.DATABASE_URL,
     echo=False,
     pool_pre_ping=True,
-    pool_size=5,  # Max number of permanent connections
-    max_overflow=10,  # Max number of connections above pool_size
-    pool_timeout=30,  # Seconds to wait for connection from pool
-    pool_recycle=3600,  # Recycle connections after 1 hour (prevents stale connections)
+    pool_size=settings.DATABASE_POOL_SIZE,  # Max number of permanent connections
+    max_overflow=settings.DATABASE_MAX_OVERFLOW,  # Max number of connections above pool_size
+    pool_timeout=settings.DATABASE_POOL_TIMEOUT,  # Seconds to wait for connection from pool
+    pool_recycle=settings.DATABASE_POOL_RECYCLE,  # Recycle connections after 1 hour (prevents stale connections)
 )
 
 
