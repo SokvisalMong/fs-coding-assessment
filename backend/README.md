@@ -42,6 +42,28 @@ This assessment evaluates your ability to build a **production-grade RESTful API
 
 The API will be available at `http://localhost:8000`
 
+### Database
+
+Start db container
+```bash
+docker compose up -d db
+```
+
+Stop db container
+```bash
+docker compose down
+```
+
+Apply migrations
+```bash
+uv run alembic upgrade head
+```
+
+Make migration changes
+```bash
+uv run alembic revision --autogenerate -m "describe_change"
+```
+
 ## Required Tasks
 
 ### Task 1: Database Relationship - Connect Todo and User Tables
