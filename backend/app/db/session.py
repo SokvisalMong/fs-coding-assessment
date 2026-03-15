@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.config import get_settings
+import app.models  # noqa: F401
 
 
 settings = get_settings()
