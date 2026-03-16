@@ -1,42 +1,15 @@
-type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-export type ApiMethod = HttpMethod | Lowercase<HttpMethod>;
+import type {
+  ApiParams,
+  ApiRequestOptions,
+  ApiResponse,
+} from "@/interfaces/api.interface";
+import type { ApiMethod, QueryValue } from "@/types/api";
 
-export type Primitive = string | number | boolean;
-type QueryValue = Primitive | null | undefined;
-
-export interface ApiRequestOptions<TBody = unknown> {
-  method?: ApiMethod;
-  body?: TBody;
-  headers?: HeadersInit;
-  query?: Record<string, QueryValue>;
-  token?: string;
-  cache?: RequestCache;
-  next?: NextFetchRequestConfig;
-}
-
-export interface ApiSuccess<TData> {
-  ok: true;
-  status: number;
-  data: TData;
-}
-
-export interface ApiFailure {
-  ok: false;
-  status: number;
-  message: string;
-  error: unknown;
-}
-
-export type ApiResult<TData> = ApiSuccess<TData> | ApiFailure;
-
-export interface ApiParams<TBody = unknown> extends ApiRequestOptions<TBody> {
-  endpoint: string;
-}
-
-interface ApiResponse<TData> {
-  status: number;
-  data: TData;
-}
+export type { ApiParams, ApiRequestOptions };
+export type { ApiMethod, QueryValue };
+export type ApiResult<TData> =
+  | import("@/interfaces/api.interface").ApiSuccess<TData>
+  | import("@/interfaces/api.interface").ApiFailure;
 
 export class ApiError extends Error {
   status: number;
@@ -98,10 +71,6 @@ function shouldSerializeJson(body: unknown): boolean {
   return true;
 }
 
-function normalizeMethod(method: ApiMethod = "GET"): HttpMethod {
-  return method.toUpperCase() as HttpMethod;
-}
-
 async function parseResponseBody(response: Response): Promise<unknown> {
   const contentType = response.headers.get("content-type") ?? "";
 
@@ -136,7 +105,7 @@ function buildRequestHeaders(
 
 export async function apiRequest<TData, TBody = unknown>(
   endpoint: string,
-  options: ApiRequestOptions<TBody> = {},
+  options: ApiRequestOptions<TBody>,
 ): Promise<TData> {
   const response = await apiRequestWithMeta<TData, TBody>(endpoint, options);
   return response.data;
@@ -144,10 +113,15 @@ export async function apiRequest<TData, TBody = unknown>(
 
 async function apiRequestWithMeta<TData, TBody = unknown>(
   endpoint: string,
-  options: ApiRequestOptions<TBody> = {},
+  options: ApiRequestOptions<TBody>,
 ): Promise<ApiResponse<TData>> {
-  const { method = "GET", body, headers, query, token, cache, next } = options;
-  const normalizedMethod = normalizeMethod(method);
+  const { method, body, headers, query, token, cache, next } = options;
+
+  if (!method) {
+    throw new Error("API method is required");
+  }
+
+  const normalizedMethod = method;
 
   const serializedBody = shouldSerializeJson(body) ? JSON.stringify(body) : body;
   const requestHeaders = buildRequestHeaders(
@@ -186,7 +160,7 @@ async function apiRequestWithMeta<TData, TBody = unknown>(
 
 export async function apiSafeRequest<TData, TBody = unknown>(
   endpoint: string,
-  options: ApiRequestOptions<TBody> = {},
+  options: ApiRequestOptions<TBody>,
 ): Promise<ApiResult<TData>> {
   try {
     const response = await apiRequestWithMeta<TData, TBody>(endpoint, options);
