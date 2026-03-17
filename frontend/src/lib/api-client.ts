@@ -2,6 +2,7 @@ import type {
   ApiParams,
   ApiRequestOptions,
   ApiResponse,
+  StandardApiResponse,
 } from "@/interfaces/api.interface";
 import type { ApiMethod, QueryValue } from "@/types/api";
 
@@ -85,6 +86,18 @@ async function parseResponseBody(response: Response): Promise<unknown> {
   return null;
 }
 
+function isApiEnvelope<TData>(payload: unknown): payload is StandardApiResponse<TData> {
+  if (typeof payload !== "object" || payload === null) return false;
+
+  return (
+    "code" in payload &&
+    typeof (payload as { code?: unknown }).code === "number" &&
+    "message" in payload &&
+    typeof (payload as { message?: unknown }).message === "string" &&
+    "data" in payload
+  );
+}
+
 function buildRequestHeaders(
   headers?: HeadersInit,
   token?: string,
@@ -106,7 +119,7 @@ function buildRequestHeaders(
 export async function apiRequest<TData, TBody = unknown>(
   endpoint: string,
   options: ApiRequestOptions<TBody>,
-): Promise<TData> {
+): Promise<TData | null> {
   const response = await apiRequestWithMeta<TData, TBody>(endpoint, options);
   return response.data;
 }
@@ -140,21 +153,26 @@ async function apiRequestWithMeta<TData, TBody = unknown>(
 
   const payload = await parseResponseBody(response);
 
+  const envelope = isApiEnvelope<TData>(payload) ? payload : null;
+
   if (!response.ok) {
     const message =
-      typeof payload === "object" &&
+      envelope?.message ??
+      (typeof payload === "object" &&
       payload !== null &&
       "detail" in payload &&
       typeof (payload as { detail?: unknown }).detail === "string"
         ? ((payload as { detail: string }).detail ?? "Request failed")
-        : response.statusText || "Request failed";
+        : response.statusText || "Request failed");
 
-    throw new ApiError(response.status, message, payload);
+    throw new ApiError(envelope?.code ?? response.status, message, payload);
   }
+
+  const data = envelope ? (envelope.data as TData) : (payload as TData);
 
   return {
     status: response.status,
-    data: payload as TData,
+    data,
   };
 }
 
@@ -190,7 +208,7 @@ export async function apiSafeRequest<TData, TBody = unknown>(
 
 export async function api<TData, TBody = unknown>(
   params: ApiParams<TBody>,
-): Promise<TData> {
+): Promise<TData | null> {
   const { endpoint, ...options } = params;
   return apiRequest<TData, TBody>(endpoint, options);
 }

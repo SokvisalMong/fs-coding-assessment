@@ -1,4 +1,10 @@
-import type { ApiMethod, QueryValue } from "@/types/api";
+import type {
+	ApiEnvelope,
+	ApiMethod,
+	PaginatedData,
+	PaginatedMeta,
+	QueryValue,
+} from "@/types/api";
 
 export interface ApiRequestOptions<TBody = unknown> {
 	method: ApiMethod;
@@ -13,7 +19,7 @@ export interface ApiRequestOptions<TBody = unknown> {
 export interface ApiSuccess<TData> {
 	ok: true;
 	status: number;
-	data: TData;
+	data: TData | null;
 }
 
 export interface ApiFailure {
@@ -29,5 +35,9 @@ export interface ApiParams<TBody = unknown> extends ApiRequestOptions<TBody> {
 
 export interface ApiResponse<TData> {
 	status: number;
-	data: TData;
+	data: TData | null;
 }
+
+export type StandardApiResponse<TData> = ApiEnvelope<TData>;
+export type StandardPaginatedData<TResult> = PaginatedData<TResult>;
+export type StandardPaginationMeta = PaginatedMeta;
