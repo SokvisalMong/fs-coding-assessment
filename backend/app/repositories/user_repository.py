@@ -1,6 +1,7 @@
 import uuid
 
 from pydantic import EmailStr
+from sqlalchemy import func
 from sqlmodel import Session, select
 
 from app.models.user import User
@@ -25,10 +26,16 @@ class UserRepository:
         result = await self.session.exec(statement)
         return result.first()
 
-    async def get_users(self) -> list[User]:
-        statement = select(User)
+    async def get_users(self, skip: int = 0, limit: int = 10) -> tuple[list[User], int]:
+        statement = select(User).offset(skip).limit(limit)
         result = await self.session.exec(statement)
-        return result.all()
+        users = result.all()
+
+        count_statement = select(func.count()).select_from(User)
+        total_count_result = await self.session.exec(count_statement)
+        total_count = total_count_result.one()
+
+        return users, total_count
 
     async def register_user(self, user_in: UserCreate) -> User:
         user = User(**user_in.model_dump())

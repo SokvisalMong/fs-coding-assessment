@@ -81,8 +81,11 @@ class UserService:
             )
         return user
 
-    async def get_users(self) -> list[UserRead]:
-        return await self.user_repository.get_users()
+    async def get_users(
+        self, page: int = 1, items_per_page: int = 10
+    ) -> tuple[list[UserRead], int]:
+        skip = (page - 1) * items_per_page
+        return await self.user_repository.get_users(skip=skip, limit=items_per_page)
 
     async def update_user(self, user_id: uuid.UUID, user_in: UserUpdate) -> UserRead:
         user = await self.user_repository.update_user(user_id, user_in)

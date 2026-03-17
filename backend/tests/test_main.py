@@ -21,10 +21,11 @@ class TestRootEndpoint:
 
         assert response.status_code == 200
         data = response.json()
-        assert "message" in data
-        assert data["message"] == "Todo API is running!"
-        assert data["version"] == "1.0.0"
-        assert data["docs"] == "/docs"
+        assert data["code"] == 200
+        assert data["message"] == "ok"
+        assert data["data"]["message"] == "Todo API is running!"
+        assert data["data"]["version"] == "1.0.0"
+        assert data["data"]["docs"] == "/docs"
 
     def test_root_returns_json_content_type(self, client: TestClient):
         response = client.get("/")
@@ -40,7 +41,9 @@ class TestHealthEndpoint:
 
         assert response.status_code == 200
         data = response.json()
-        assert data == {"status": "ok"}
+        assert data["code"] == 200
+        assert data["message"] == "ok"
+        assert data["data"] == {"status": "ok"}
 
     def test_health_check_returns_json_content_type(self, client: TestClient):
         response = client.get("/health")
