@@ -183,7 +183,7 @@ uv run pytest tests/test_todos.py -v
 - [x] **Task 1**: Add foreign key relationship between Todo and User tables
 - [ ] **Task 2**: Implement all 6 Todo CRUD endpoints
   - [x] POST /api/v1/todos (Create)
-  - [ ] GET /api/v1/todos (List all - hide description for non-owners, pagination, filtering, search)
+  - [x] GET /api/v1/todos (List all - hide description for non-owners, pagination, filtering, search)
   - [ ] GET /api/v1/todos/{id} (Get single - owner only)
   - [ ] PATCH /api/v1/todos/{id} (Update - owner only)
   - [ ] DELETE /api/v1/todos/{id} (Delete - owner only)

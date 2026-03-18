@@ -1,5 +1,5 @@
 import uuid
-from sqlmodel import select
+from sqlmodel import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.todo import Todo
 from app.schemas.todo import TodoFilterParams
@@ -26,7 +26,7 @@ class TodoRepository:
             if filters.priority:
                 query = query.where(Todo.priority == filters.priority)
             if filters.title:
-                query = query.where(Todo.title.contains(filters.title))
+                query = query.where(func.lower(Todo.title).contains(filters.title.lower()))
         return query
 
     async def get_todos_by_owner_query(self, owner_id: uuid.UUID):
