@@ -6,8 +6,8 @@ import {
   LoginResponse,
   RegisterPayload,
   RegisterActionResponse,
-  User
 } from "@/interfaces/auth.interface";
+import { User } from "@/models/user.model";
 import { apiRequest } from "@/lib/api.server";
 import { cookies } from "next/headers";
 

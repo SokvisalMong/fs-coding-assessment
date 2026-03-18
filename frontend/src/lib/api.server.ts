@@ -2,7 +2,7 @@ import "server-only";
 
 import { cookies } from "next/headers";
 import { BaseRequestParams, BaseResponse } from "@/interfaces/api.interface";
-import { STATUS_CODE } from "@/enums/status.enum";
+import { STATUS_CODE } from "@/enums/status-code.enum";
 
 const authTokenKey = "authToken";
 
@@ -58,8 +58,11 @@ export const apiRequest = async <T> ({
 
   const { code, message } = responseData;
 
-  if (code === STATUS_CODE.UNAUTHORIZED || code === STATUS_CODE.FORBIDDEN) {
-    // clear zustand auth state
+  if (code === STATUS_CODE.UNAUTHORIZED) {
+    // Invalidate authToken in cookie and reset zustand store
+    const cookieStore = await cookies();
+    cookieStore.delete(authTokenKey);
+    throw new Error("UNAUTHORIZED");
   } else if (code !== STATUS_CODE.OK && code !== STATUS_CODE.CREATED) {
     throw new Error(message);
   }

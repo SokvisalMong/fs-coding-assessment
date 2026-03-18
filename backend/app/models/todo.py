@@ -25,7 +25,7 @@ class TodoStatus(str, Enum):
 
 class TodoBase(SQLModel):
     title: str = Field(max_length=200, nullable=False)
-    description: str = Field(nullable=False)
+    description: str | None = Field(nullable=True)
     status: TodoStatus = Field(default=TodoStatus.NOT_STARTED, nullable=False)
     priority: Priority | None = Field(default=None, nullable=True)
     due_date: datetime | None = Field(

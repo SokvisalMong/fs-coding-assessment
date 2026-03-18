@@ -1,3 +1,4 @@
+import uuid
 from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
@@ -36,10 +37,14 @@ async def get_todos(
     return success_response(paginated_results)
 
 
-@router.get("/{todo_id}")
-async def get_todo():
-    # TODO: Implement get todo endpoint
-    return success_response("todo")
+@router.get("/{todo_id}", response_model=ApiResponse[TodoRead])
+async def get_todo(
+    todo_id: uuid.UUID,
+    todo_service: TodoServiceDep,
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    todo = await todo_service.get_todo_by_id(todo_id, current_user.id)
+    return success_response(todo)
 
 
 @router.patch("/{todo_id}")

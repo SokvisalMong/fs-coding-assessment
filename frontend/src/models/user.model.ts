@@ -1,5 +1,8 @@
 export interface User {
   id: string;
-  name: string;
-  email: string;
+  username: string;
+  email?: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
 }

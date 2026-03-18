@@ -17,6 +17,20 @@ class TodoService:
         todo = Todo(**todo_in.model_dump(), owner_id=owner_id)
         return await self.todo_repository.create_todo(todo)
 
+    async def get_todo_by_id(self, todo_id: uuid.UUID, current_user_id: uuid.UUID) -> Todo:
+        todo = await self.todo_repository.get_todo_by_id(todo_id)
+        if not todo:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Todo not found",
+            )
+        if todo.owner_id != current_user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not authorized to access this todo",
+            )
+        return todo
+
     async def get_all_todos(
         self, 
         current_user_id: uuid.UUID, 
@@ -29,7 +43,7 @@ class TodoService:
         # Hide description for todos not owned by the current user
         for todo in paginated_data.results:
             if todo.owner_id != current_user_id:
-                todo.description = "HIDDEN"
+                todo.description = None
         
         return paginated_data
 
