@@ -3,6 +3,7 @@ from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING
 
+from sqlalchemy import DateTime
 from sqlmodel import Field, Relationship, SQLModel
 
 from app.schemas.mixin import TimeStampMixin
@@ -27,7 +28,11 @@ class TodoBase(SQLModel):
     description: str = Field(nullable=False)
     status: TodoStatus = Field(default=TodoStatus.NOT_STARTED, nullable=False)
     priority: Priority | None = Field(default=None, nullable=True)
-    due_date: datetime | None = Field(default=None, nullable=True)
+    due_date: datetime | None = Field(
+        default=None,
+        nullable=True,
+        sa_type=DateTime(timezone=True),
+    )
 
 
 class Todo(TodoBase, TimeStampMixin, table=True):
