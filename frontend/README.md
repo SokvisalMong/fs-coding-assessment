@@ -64,10 +64,10 @@ Implement complete authentication:
 - [x] JWT token management
   - Store tokens securely (httpOnly cookies or localStorage with XSS protection)
   - Handle token expiration gracefully
-- [ ] Protected routes
+- [x] Protected routes
   - Redirect to login if not authenticated
   - Middleware or HOC for route protection
-- [ ] User profile display
+- [x] User profile display
   - Show logged-in user info in header
   - Logout functionality (clear token in frontend)
 

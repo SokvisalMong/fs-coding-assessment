@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LoginPayload } from "@/interfaces/auth.interface";
 import { login } from "../../actions/auth";
+import { useAuthStore } from "@/store/auth.store";
 import { 
   InputGroup,
   InputGroupAddon,
@@ -63,6 +64,7 @@ export function LoginCard() {
       const response = await login(payload)
       
       if (response.success) {
+        await useAuthStore.getState().initialize();
         router.push("/");
       }
     } catch (error) {

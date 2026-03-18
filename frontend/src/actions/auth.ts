@@ -5,7 +5,8 @@ import {
   LoginPayload, 
   LoginResponse,
   RegisterPayload,
-  RegisterActionResponse
+  RegisterActionResponse,
+  User
 } from "@/interfaces/auth.interface";
 import { apiRequest } from "@/lib/api.server";
 import { cookies } from "next/headers";
@@ -34,6 +35,14 @@ export async function login(payload: LoginPayload) {
   return actionResponse;
 }
 
+export async function getCurrentUser() {
+  const response = await apiRequest<User>({
+    method: "get",
+    endpoint: "users/me",
+  });
+  return response.data;
+}
+
 export async function register(payload: RegisterPayload) {
   await apiRequest({
     method: "post",
@@ -42,4 +51,9 @@ export async function register(payload: RegisterPayload) {
   })
 
   return { success: true } as RegisterActionResponse;
+}
+
+export async function logoutAction() {
+  const cookieStore = await cookies();
+  cookieStore.delete("authToken");
 }
