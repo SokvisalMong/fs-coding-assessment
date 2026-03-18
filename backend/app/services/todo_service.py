@@ -51,3 +51,17 @@ class TodoService:
         query = await self.todo_repository.get_todos_by_owner_query(owner_id)
         return await paginate_query(self.todo_repository.session, query, params)
 
+    async def delete_todo(self, todo_id: uuid.UUID, current_user_id: uuid.UUID) -> None:
+        todo = await self.todo_repository.get_todo_by_id(todo_id)
+        if not todo:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Todo not found",
+            )
+        if todo.owner_id != current_user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not authorized to delete this todo",
+            )
+        await self.todo_repository.delete_todo(todo)
+

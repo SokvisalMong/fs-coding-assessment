@@ -52,10 +52,14 @@ async def update_todo():
     return success_response("todo")
 
 
-@router.delete("/{todo_id}", response_model=ApiResponse[None])
-async def delete_todo():
-    # TODO: Implement delete todo endpoint
-    return success_response(None)
+@router.delete("/{todo_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_todo(
+    todo_id: uuid.UUID,
+    todo_service: TodoServiceDep,
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    await todo_service.delete_todo(todo_id, current_user.id)
+    return None
 
 
 @router.patch("/{todo_id}/complete")

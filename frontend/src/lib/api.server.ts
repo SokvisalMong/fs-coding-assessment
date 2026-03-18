@@ -54,6 +54,17 @@ export const apiRequest = async <T> ({
           : JSON.stringify(data),
   });
   
+  // Handle 204 No Content response
+  if (response.status === 204) {
+    const lateTime = performance.now() - startTime;
+    return {
+      code: 204,
+      message: "No Content",
+      data: null as T,
+      late_time: lateTime,
+    } as BaseResponse<T>;
+  }
+
   const responseData: BaseResponse<T> = await response.json();
 
   const { code, message } = responseData;

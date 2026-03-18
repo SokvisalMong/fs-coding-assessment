@@ -36,3 +36,10 @@ export async function getTodo(id: string) {
 
   return response.data;
 }
+
+export async function deleteTodo(id: string) {
+  await apiRequest({
+    method: "delete",
+    endpoint: `todos/${id}`
+  })
+}

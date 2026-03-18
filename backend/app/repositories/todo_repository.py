@@ -32,3 +32,7 @@ class TodoRepository:
     async def get_todos_by_owner_query(self, owner_id: uuid.UUID):
         return select(Todo).where(Todo.owner_id == owner_id)
 
+    async def delete_todo(self, todo: Todo) -> None:
+        await self.session.delete(todo)
+        await self.session.commit()
+
