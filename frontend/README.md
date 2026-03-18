@@ -55,13 +55,13 @@ Visit [http://localhost:3000](http://localhost:3000)
 
 Implement complete authentication:
 
-- [ ] Registration page with form validation
+- [x] Registration page with form validation
   - Username and password validation (allowed characters and length)
   - Display validation errors
-- [ ] Login page
+- [x] Login page
   - Username and password fields
   - Error handling for invalid credentials
-- [ ] JWT token management
+- [x] JWT token management
   - Store tokens securely (httpOnly cookies or localStorage with XSS protection)
   - Handle token expiration gracefully
 - [ ] Protected routes

@@ -6,6 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button";
 import { EyeSlashIcon, EyeIcon } from "@phosphor-icons/react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { LoginPayload } from "@/interfaces/auth.interface";
+import { login } from "../../actions/auth";
 import { 
   InputGroup,
   InputGroupAddon,
@@ -18,11 +21,11 @@ import {
   CardTitle,
   CardAction, 
   CardDescription, 
-  CardContent, 
-  CardFooter 
+  CardContent
 } from "@/components/ui/card";
 import {
   Field,
+  FieldDescription,
   FieldGroup,
   FieldLabel
 } from "@/components/ui/field";
@@ -31,15 +34,16 @@ const formSchema = z.object({
   username: z
     .string()
     .min(1, "Username is required")
-    .max(255, "Username must be less than 255 characters"),
+    .max(255, "Must be less than 255 characters"),
   password: z
     .string()
-    .min(8, "Password must be at least 8 characters")
-    .max(255, "Password must be less than 255 characters"),
+    .min(8, "Must be at least 8 characters")
+    .max(255, "Must be less than 255 characters"),
 })
 
 export function LoginCard() {
   const [isShowingPassword, setIsShowingPassword] = useState(false);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -49,17 +53,32 @@ export function LoginCard() {
     }
   })
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    console.log(data);
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    const payload: LoginPayload = {
+      username: data.username,
+      password: data.password,
+    }
+
+    try {
+      const response = await login(payload)
+      
+      if (response.success) {
+        router.push("/");
+      }
+    } catch (error) {
+      form.setError("root", {
+        message: (error as Error).message
+      });
+    }
   }
 
   return (
-    <Card className="w-full max-w-72">
+    <Card className="w-full max-w-72 gap-4">
       <CardHeader>
         <CardTitle>Login</CardTitle>
         <CardDescription>Enter login credentials</CardDescription>
         <CardAction>
-          <Button variant="link">
+          <Button variant="link" className="cursor-pointer" onClick={() => router.push("/register")}>
             Register
           </Button>
         </CardAction>
@@ -72,32 +91,48 @@ export function LoginCard() {
             <Field>
               <FieldLabel>Username</FieldLabel>
               <InputGroup>
-                <InputGroupInput placeholder="Username"/>
+                <InputGroupInput placeholder="Username" {...form.register("username")} />
               </InputGroup>
+              <FieldDescription className="text-destructive">
+                {form.formState.errors.username ? form.formState.errors.username.message : ""}
+              </FieldDescription>
             </Field>
             {/* Password */}
             <Field>
               <FieldLabel>Password</FieldLabel>
               <InputGroup>
-                <InputGroupInput placeholder="Password" type={isShowingPassword ? "text" : "password"}/>
+                <InputGroupInput
+                  placeholder="Password"
+                  type={isShowingPassword ? "text" : "password"}
+                  {...form.register("password")}
+                />
                 <InputGroupAddon align="inline-end">
                   <InputGroupButton
+                    type="button"
+                    className="cursor-pointer"
                     onClick={() => setIsShowingPassword(!isShowingPassword)}
-                    >
+                  >
                     {isShowingPassword ? <EyeIcon/> : <EyeSlashIcon/>}
                   </InputGroupButton>
                 </InputGroupAddon>
               </InputGroup>
+              <FieldDescription className="text-destructive">
+                {form.formState.errors.password ? form.formState.errors.password.message : ""}
+              </FieldDescription>
             </Field>
+
+            <Button type="submit" className="w-full cursor-pointer">
+              Login
+            </Button>
+
+            {form.formState.errors.root && (
+              <FieldDescription className="text-destructive">
+                {form.formState.errors.root.message}
+              </FieldDescription>
+            )}
           </FieldGroup>
         </form>
       </CardContent>
-
-      <CardFooter className="flex">
-        <Button className="w-full">
-          Login
-        </Button>
-      </CardFooter>
     </Card>
   )
 }
