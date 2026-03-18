@@ -11,10 +11,7 @@ export const apiRequest = async <T> ({
   endpoint,
   data,
 }: BaseRequestParams) => {
-  const baseApiUrl = process.env.NEXT_PUBLIC_API_URL;
-  const apiPrefix = process.env.NEXT_PUBLIC_API_PREFIX;
-
-  const apiUrl = `${baseApiUrl}${apiPrefix}`;
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const requestHeaders: HeadersInit = {
     "Content-Type": "application/json",

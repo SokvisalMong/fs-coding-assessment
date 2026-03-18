@@ -21,7 +21,6 @@ const initialState = {
 export const useAuthStore = create<AuthState>()((set, get) => ({
   ...initialState,
   initialize: async () => {
-    console.log("Initializing auth store...");
     const user = await getClientCurrentUser();
     set({ user, isAuthenticated: !!user });
   },
