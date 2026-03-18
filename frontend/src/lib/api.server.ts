@@ -58,7 +58,7 @@ export const apiRequest = async <T> ({
 
   const { code, message } = responseData;
 
-  if (code === STATUS_CODE.UNAUTHORIZED) {
+  if (code === STATUS_CODE.UNAUTHORIZED || code === STATUS_CODE.FORBIDDEN) {
     // clear zustand auth state
   } else if (code !== STATUS_CODE.OK && code !== STATUS_CODE.CREATED) {
     throw new Error(message);
