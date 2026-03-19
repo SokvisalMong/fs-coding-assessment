@@ -1,17 +1,22 @@
 "use client";
 
+import { useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Todo } from "@/models/todo.model";
 import { PRIORITY } from "@/enums/priority.enum";
 import { STATUS } from "@/enums/status.enum";
 import { useAuthStore } from "@/store/auth.store";
-import { EyeIcon, TrashIcon } from "@phosphor-icons/react";
+import { EyeIcon, TrashIcon, CircleNotchIcon } from "@phosphor-icons/react";
 
 interface TodosListProps {
   todos?: Todo[];
   onViewTodo?: (todoId: string) => void;
   onDeleteTodo?: (todo: Todo) => void;
+  onUpdateStatus?: (todo: Todo) => void;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
+  isLoading?: boolean;
 }
 
 const statusClassMap: Record<STATUS, string> = {
@@ -50,47 +55,84 @@ const formatDate = (value: string | null) => {
   return `${day}/${month}/${year}`;
 };
 
-export function TodosList({ todos = [], onViewTodo, onDeleteTodo }: TodosListProps) {
+export function TodosList({ todos = [], onViewTodo, onDeleteTodo, onUpdateStatus, onLoadMore, hasMore, isLoading }: TodosListProps) {
   const authUserId = useAuthStore((state) => state.user?.id);
   const safeTodos = Array.isArray(todos) ? todos : [];
   const isEmpty = safeTodos.length === 0;
+  
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const lastElementRef = useCallback((node: HTMLDivElement | null) => {
+    if (isLoading) return;
+    if (observerRef.current) observerRef.current.disconnect();
+
+    observerRef.current = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore) {
+        onLoadMore?.();
+      }
+    });
+
+    if (node) observerRef.current.observe(node);
+  }, [isLoading, hasMore, onLoadMore]);
 
   return (
     <div className="h-full flex flex-col gap-4">
-      {isEmpty ? (
+      {isEmpty && !isLoading ? (
         <div className="flex-1 bg-card text-center text-muted-foreground flex items-center justify-center min-h-[10rem]">
           No todos found.
         </div>
       ) : (
-        safeTodos.map((todo) => (
-          <div key={todo.id} className="flex flex-col gap-3 rounded-lg border p-4 shadow-sm bg-card hover:bg-accent/10 transition-colors">
-            <div className="flex justify-between items-start gap-4">
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-lg truncate">{todo.title}</h3>
-                <p className="text-muted-foreground text-sm line-clamp-2 mt-1 min-h-[1.25rem]">
-                  {todo.description || "HIDDEN"}
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center justify-end gap-2 shrink-0">
-                <Badge className={`${statusClassMap[todo.status]}`}>
-                  {formatLabel(todo.status)}
-                </Badge>
-                {todo.priority && (
-                  <Badge className={`${priorityClassMap[todo.priority]}`}>
-                    {formatLabel(todo.priority)}
-                  </Badge>
-                )}
-                {todo.owner_id === authUserId ? (
-                  <Badge className="bg-emerald-200 text-emerald-800">You</Badge>
-                ) : (
-                  <Badge className="bg-slate-200 text-slate-800">Other</Badge>
-                )}
-              </div>
+        <>
+          {safeTodos.map((todo, index) => {
+            const isLast = index === safeTodos.length - 1;
+            return (
+              <div 
+                key={todo.id} 
+                ref={isLast ? lastElementRef : null}
+                className="flex flex-col gap-3 rounded-lg border p-4 shadow-sm bg-card hover:bg-accent/10 transition-colors"
+              >
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                  <div className="flex-1 min-w-0 w-full">
+                    <h3 className="font-semibold text-lg truncate">{todo.title}</h3>
+                    <p className="text-muted-foreground text-sm line-clamp-2 mt-1 min-h-[1.25rem]">
+                      {todo.description || "HIDDEN"}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-start sm:justify-end gap-x-4 gap-y-2 shrink-0 w-full sm:w-auto">
+                    <div className="flex items-center gap-1.5 text-sm">
+                      <span className="text-muted-foreground">Status:</span>
+                      <Badge 
+                        className={`${statusClassMap[todo.status]} ${todo.owner_id === authUserId ? "cursor-pointer hover:opacity-80" : ""}`}
+                        onClick={() => todo.owner_id === authUserId && onUpdateStatus?.(todo)}
+                      >
+                        {formatLabel(todo.status)}
+                      </Badge>
+                    </div>
+                    {todo.priority && (
+                      <div className="flex items-center gap-1.5 text-sm">
+                        <span className="text-muted-foreground">Priority:</span>
+                        <Badge className={`${priorityClassMap[todo.priority]}`}>
+                          {formatLabel(todo.priority)}
+                        </Badge>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1.5 text-sm">
+                      <span className="text-muted-foreground">Owner:</span>
+                      {todo.owner_id === authUserId ? (
+                        <Badge className="bg-emerald-200 text-emerald-800">You</Badge>
+                      ) : (
+                        <Badge className="bg-slate-200 text-slate-800">Other</Badge>
+                      )}
+                    </div>
+                  </div>
             </div>
-            <div className="flex items-center justify-between text-sm mt-1">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 text-sm mt-3 sm:mt-1">
               <div className="text-muted-foreground flex items-center gap-1">
-                <span className="font-medium">Due:</span> 
-                {formatDate(todo.due_date)}
+                {todo.due_date ? (
+                  <>
+                    <span className="font-medium">Due:</span> 
+                    {formatDate(todo.due_date)}
+                  </>
+                ) : null}
               </div>
               
               {todo.owner_id === authUserId && (
@@ -107,7 +149,14 @@ export function TodosList({ todos = [], onViewTodo, onDeleteTodo }: TodosListPro
               )}
             </div>
           </div>
-        ))
+            );
+          })}
+          {isLoading && (
+            <div className="flex justify-center p-4">
+              <CircleNotchIcon className="animate-spin text-muted-foreground w-6 h-6" />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

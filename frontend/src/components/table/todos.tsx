@@ -20,6 +20,7 @@ interface TodosListTableProps {
   todos?: Todo[];
   onViewTodo?: (todoId: string) => void;
   onDeleteTodo?: (todo: Todo) => void;
+  onUpdateStatus?: (todo: Todo) => void;
 }
 
 const statusClassMap: Record<STATUS, string> = {
@@ -58,7 +59,7 @@ const formatDate = (value: string | null) => {
   return `${day}/${month}/${year}`;
 };
 
-export function TodosTable({ todos = [], onViewTodo, onDeleteTodo }: TodosListTableProps) {
+export function TodosTable({ todos = [], onViewTodo, onDeleteTodo, onUpdateStatus }: TodosListTableProps) {
   const authUserId = useAuthStore((state) => state.user?.id);
   const safeTodos = Array.isArray(todos) ? todos : [];
   const isEmpty = safeTodos.length === 0;
@@ -66,7 +67,7 @@ export function TodosTable({ todos = [], onViewTodo, onDeleteTodo }: TodosListTa
   return (
     <div className="h-full flex flex-col">
       <div className="w-full overflow-x-auto">
-        <Table className="w-fulltable-fixed">
+        <Table className="w-full min-w-[800px] table-fixed">
           <colgroup>
             <col className="w-[16%]" />
             <col className="w-[21%]" />
@@ -96,7 +97,10 @@ export function TodosTable({ todos = [], onViewTodo, onDeleteTodo }: TodosListTa
                     {todo.description || "HIDDEN"}
                   </TableCell>
                   <TableCell className="text-center overflow-hidden">
-                    <Badge className={`${statusClassMap[todo.status]} max-w-full overflow-hidden text-ellipsis whitespace-nowrap`}>
+                    <Badge 
+                      className={`${statusClassMap[todo.status]} max-w-full overflow-hidden text-ellipsis whitespace-nowrap ${todo.owner_id === authUserId ? "cursor-pointer hover:opacity-80" : ""}`}
+                      onClick={() => todo.owner_id === authUserId && onUpdateStatus?.(todo)}
+                    >
                       {formatLabel(todo.status)}
                     </Badge>
                   </TableCell>

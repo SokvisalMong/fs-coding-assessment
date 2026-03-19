@@ -72,12 +72,12 @@ export function PaginationControls({
   };
 
   return (
-    <div className="flex flex-row justify-between w-full">
+    <div className="flex flex-row gap-4 items-end justify-between w-full">
       {/* Pagination limits */}
-      <div className="flex flex-col gap-1.5">
-        <Label>Items Per Page</Label>
+      <div className="flex flex-col gap-1.5 items-start">
+        <Label className="text-nowrap">Items Per Page</Label>
         <Select value={itemsPerPage.toString()} onValueChange={(value) => onItemsPerPageChange(Number(value))}>
-          <SelectTrigger className="w-20">
+          <SelectTrigger className="w-full sm:w-20">
             <SelectValue/>
           </SelectTrigger>
           <SelectContent>
@@ -91,11 +91,11 @@ export function PaginationControls({
       </div>
 
       {/* Pagination controls */}
-      <div className="flex flex-col gap-1.5 items-end">
+      <div className="flex flex-col gap-2 items-end w-full sm:w-auto mt-2 sm:mt-0">
         {/* Showing current items out of total items */}
-        <Label className="text-right">Showing {startItem}-{endItem} of {itemCount} total items</Label>
+        <Label className="text-center sm:text-right text-muted-foreground font-normal">Showing {startItem}-{endItem} of {itemCount} total items</Label>
         <Pagination className="mx-0 justify-end">
-          <PaginationContent className="justify-end">
+          <PaginationContent className="justify-center sm:justify-end flex-wrap gap-1">
             <PaginationItem>
               <PaginationPrevious
                 href="#"

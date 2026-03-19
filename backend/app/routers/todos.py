@@ -6,9 +6,9 @@ from app.dependencies.auth import get_current_user
 from app.dependencies.todo import TodoServiceDep
 from app.models.user import User
 from app.schemas.response import ApiResponse, PaginatedData
-from app.schemas.todo import TodoCreate, TodoRead, TodoFilterParams
+from app.schemas.todo import TodoCreate, TodoFilterParams, TodoRead, TodoStats, TodoUpdate
 from app.schemas.pagination import PaginationParams
-from app.utils.response import success_response, paginated_response
+from app.utils.response import success_response
 
 
 router = APIRouter(prefix="/todos", tags=["todos"])
@@ -37,6 +37,15 @@ async def get_todos(
     return success_response(paginated_results)
 
 
+@router.get("/stats", response_model=ApiResponse[TodoStats])
+async def get_stats(
+    todo_service: TodoServiceDep,
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    stats = await todo_service.get_todo_stats(current_user.id)
+    return success_response(stats)
+
+
 @router.get("/{todo_id}", response_model=ApiResponse[TodoRead])
 async def get_todo(
     todo_id: uuid.UUID,
@@ -47,9 +56,15 @@ async def get_todo(
     return success_response(todo)
 
 
-@router.patch("/{todo_id}")
-async def update_todo():
-    return success_response("todo")
+@router.patch("/{todo_id}", response_model=ApiResponse[TodoRead])
+async def update_todo(
+    todo_id: uuid.UUID,
+    todo_in: TodoUpdate,
+    todo_service: TodoServiceDep,
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    todo = await todo_service.update_todo(todo_id, todo_in, current_user.id)
+    return success_response(todo)
 
 
 @router.delete("/{todo_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -62,13 +77,11 @@ async def delete_todo(
     return None
 
 
-@router.patch("/{todo_id}/complete")
-async def complete_todo():
-    # TODO: Implement complete todo endpoint
-    return success_response("todo")
-
-
-@router.get("/stats")
-async def get_stats():
-    # TODO: Implement get stats endpoint
-    return success_response("stats")
+@router.patch("/{todo_id}/complete", response_model=ApiResponse[TodoRead])
+async def complete_todo(
+    todo_id: uuid.UUID,
+    todo_service: TodoServiceDep,
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    todo = await todo_service.complete_todo(todo_id, current_user.id)
+    return success_response(todo)

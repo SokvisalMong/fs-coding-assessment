@@ -289,7 +289,7 @@ export function TodoForm({
               <InputGroup>
                 <InputGroupInput 
                   {...form.register('title')}
-                  disabled={isReadOnly}
+                  readOnly={isReadOnly}
                   placeholder="Title" 
                   autoComplete="off"
                 />
@@ -305,7 +305,7 @@ export function TodoForm({
               <InputGroup>
                 <InputGroupTextarea required
                   {...form.register('description')}
-                  disabled={isReadOnly}
+                  readOnly={isReadOnly}
                   placeholder="Description"
                   autoComplete="off"
                 />
@@ -330,7 +330,7 @@ export function TodoForm({
                   }}
                   disabled={isReadOnly}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className={`w-full ${isReadOnly ? "disabled:opacity-100" : ""}`}>
                     <SelectValue placeholder="Select Priority"/>
                   </SelectTrigger>
                   <SelectContent>
@@ -353,7 +353,7 @@ export function TodoForm({
                       variant="outline"
                       disabled={isReadOnly}
                       data-empty={form.watch("dueDate") ? "false" : "true"}
-                      className="justify-start text-left font-normal data-[empty=true]:text-muted-foreground"
+                      className={`justify-start text-left font-normal data-[empty=true]:text-muted-foreground ${isReadOnly ? "disabled:opacity-100" : ""}`}
                     >
                       <CalendarBlankIcon/>
                       {form.watch("dueDate") ? new Date(form.watch("dueDate")!).toLocaleDateString() : "Select date"}

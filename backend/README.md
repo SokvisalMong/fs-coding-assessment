@@ -181,14 +181,14 @@ uv run pytest tests/test_todos.py -v
 ### Core Requirements (Must Complete)
 
 - [x] **Task 1**: Add foreign key relationship between Todo and User tables
-- [ ] **Task 2**: Implement all 6 Todo CRUD endpoints
+- [x] **Task 2**: Implement all 6 Todo CRUD endpoints
   - [x] POST /api/v1/todos (Create)
   - [x] GET /api/v1/todos (List all - hide description for non-owners, pagination, filtering, search)
   - [x] GET /api/v1/todos/{id} (Get single - owner only)
-  - [ ] PATCH /api/v1/todos/{id} (Update - owner only)
-  - [ ] DELETE /api/v1/todos/{id} (Delete - owner only)
-  - [ ] PATCH /api/v1/todos/{id}/complete (Mark complete - owner only)
-- [ ] **Task 3**: Implement GET /api/v1/todos/stats endpoint
+  - [x] PATCH /api/v1/todos/{id} (Update - owner only)
+  - [x] DELETE /api/v1/todos/{id} (Delete - owner only)
+  - [x] PATCH /api/v1/todos/{id}/complete (Mark complete - owner only)
+- [x] **Task 3**: Implement GET /api/v1/todos/stats endpoint
 - [ ] **Task 4**: Write tests in `tests/test_todos.py`
   - [ ] test_create_todo_success
   - [ ] test_get_all_todos (verify description hiding for non-owners)
@@ -283,7 +283,7 @@ Before submitting, ensure:
 - [ ] All tests pass (`uv run pytest tests/ -v`)
 - [ ] Test coverage is at least 70% for todo endpoints
 - [ ] API documentation at `/docs` shows all endpoints
-- [ ] Foreign key relationship exists between Todo and User
+- [x] Foreign key relationship exists between Todo and User
 - [ ] Both required test cases are implemented and passingtodos
 - [ ] Stats endpoint returns correct calculations
 - [ ] Code follows Python best practices (type hints, docstrings)

@@ -32,3 +32,16 @@ class TodoFilterParams(SQLModel):
     status: TodoStatus | None = None
     priority: Priority | None = None
 
+
+class TodoPriorityStats(SQLModel):
+    LOW: int = 0
+    MEDIUM: int = 0
+    HIGH: int = 0
+
+
+class TodoStats(SQLModel):
+    total: int
+    completed: int
+    pending: int
+    by_priority: TodoPriorityStats
+
