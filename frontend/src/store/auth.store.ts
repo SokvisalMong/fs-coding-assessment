@@ -45,13 +45,13 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   },
   reset: () => set(initialState),
   handleUnauthorized: () => {
-    const wasAuthenticated = get().isAuthenticated;
     set({ ...initialState, isInitialized: true });
     
-    if (wasAuthenticated) {
-      toast.error("Session expired", {
-        description: "Please login again to continue.",
-      });
+    toast.error("Session expired", {
+      description: "Please login again to continue.",
+    });
+    
+    if (typeof window !== "undefined" && window.location.pathname !== "/login") {
       window.location.href = "/login";
     }
   },

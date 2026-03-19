@@ -78,10 +78,17 @@ export const apiRequest = async <T> ({
 
   const { code, message } = responseData;
 
-  if (code === STATUS_CODE.UNAUTHORIZED) {
+  const isAuthError = 
+    code === STATUS_CODE.UNAUTHORIZED || 
+    (code === STATUS_CODE.FORBIDDEN && (message === "Could not validate credentials" || message === "Not authenticated"));
+
+  if (isAuthError) {
     // Invalidate authToken in cookie and reset zustand store
     const cookieStore = await cookies();
     cookieStore.delete(authTokenKey);
+    if (endpoint === "auth/login") {
+      throw new Error(message);
+    }
     throw new Error("UNAUTHORIZED");
   } else if (code !== STATUS_CODE.OK && code !== STATUS_CODE.CREATED) {
     throw new Error(message);

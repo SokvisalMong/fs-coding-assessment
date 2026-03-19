@@ -55,19 +55,19 @@ Visit [http://localhost:3000](http://localhost:3000)
 
 Implement complete authentication:
 
-- [x] Registration page with form validation
+- [ ] Registration page with form validation
   - Username and password validation (allowed characters and length)
   - Display validation errors
-- [x] Login page
+- [ ] Login page
   - Username and password fields
   - Error handling for invalid credentials
-- [x] JWT token management
+- [ ] JWT token management
   - Store tokens securely (httpOnly cookies or localStorage with XSS protection)
   - Handle token expiration gracefully
-- [x] Protected routes
+- [ ] Protected routes
   - Redirect to login if not authenticated
   - Middleware or HOC for route protection
-- [x] User profile display
+- [ ] User profile display
   - Show logged-in user info in header
   - Logout functionality (clear token in frontend)
 
@@ -77,33 +77,33 @@ Build comprehensive todo interface:
 
 #### List View
 
-- [x] Display all todos and paginated (20 per page)
-- [x] Filtering by:
+- [ ] Display all todos and paginated (20 per page)
+- [ ] Filtering by:
   - Priority (HIGH, MEDIUM, LOW)
-- [x] Search by title functionality (debounced, min 2 chars)
-- [x] Empty states with helpful messages
-- [x] Spinner during fetch
-- [x] Infinite scroll or pagination controls
+- [ ] Search by title functionality (debounced, min 2 chars)
+- [ ] Empty states with helpful messages
+- [ ] Spinner during fetch
+- [ ] Infinite scroll or pagination controls
 
 #### Todo Item Features
 
-- [x] View todo details (only owner)
-- [x] Quick complete/uncomplete toggle (only owner)
-- [x] Editing capability (only owner)
-- [x] Delete with confirmation modal (only owner)
-- [x] Visual indicators for:
+- [ ] View todo details (only owner)
+- [ ] Quick complete/uncomplete toggle (only owner)
+- [ ] Editing capability (only owner)
+- [ ] Delete with confirmation modal (only owner)
+- [ ] Visual indicators for:
   - Priority level (colors/badges)
 
 #### Create/Edit Forms
 
-- [x] Modal or slide-over for todo creation
-- [x] Form fields:
+- [ ] Modal or slide-over for todo creation
+- [ ] Form fields:
   - Title (required, max 200 chars)
   - Description (textarea)
   - Priority selector
-- [x] Real-time validation
-- [x] Cancel and save actions
-- [x] Form dirty state handling (warn before leaving)
+- [ ] Real-time validation
+- [ ] Cancel and save actions
+- [ ] Form dirty state handling (warn before leaving)
 
 ### Task 3: Optimistic Updates & Error Handling
 
@@ -111,30 +111,30 @@ Implement production-ready UX patterns:
 
 #### Optimistic Updates
 
-- [x] Immediately update UI when user takes action
-- [x] Show pending state (e.g., opacity, spinner)
+- [ ] Immediately update UI when user takes action
+- [ ] Show pending state (e.g., opacity, spinner)
 
 #### Error Handling
 
-- [x] Error boundaries for React errors
-- [x] API error handling with retry logic
-- [x] Toast notifications for success/error
-- [x] Form validation errors displayed inline
+- [ ] Error boundaries for React errors
+- [ ] API error handling with retry logic
+- [ ] Toast notifications for success/error
+- [ ] Form validation errors displayed inline
 
 ### Task 4: Accessibility & UX
 
-- [x] Semantic HTML throughout
-- [x] ARIA labels and roles
-- [x] Keyboard navigation support (Tab, Enter, Escape)
-- [x] Screen reader friendly
+- [ ] Semantic HTML throughout
+- [ ] ARIA labels and roles
+- [ ] Keyboard navigation support (Tab, Enter, Escape)
+- [ ] Screen reader friendly
 
 ### Task 5: Responsive Design
 
 Using Tailwind CSS:
 
-- [x] Mobile-first approach
-- [x] Adaptive layouts (grid/flex)
-- [x] Work on multiple device sizes
+- [ ] Mobile-first approach
+- [ ] Adaptive layouts (grid/flex)
+- [ ] Work on multiple device sizes
 
 ---
 

@@ -1,7 +1,4 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, status
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, status
 
 from app.dependencies.user import UserServiceDep
 from app.schemas.auth import AuthToken
@@ -35,20 +32,5 @@ async def login(user_in: UserLogin, user_service: UserServiceDep):
     
     Accepts JSON credentials (username/password).
     """
-    token = await user_service.authenticate_user(user_in)
-    return success_response(token)
-
-
-@router.post("/oauth2", response_model=ApiResponse[AuthToken])
-async def login_access_token(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    user_service: UserServiceDep,
-) -> ApiResponse[AuthToken]:
-    """
-    OAuth2 compatible token login.
-    
-    Accepts form-data credentials for compatibility with Swagger UI 'Authorize' button.
-    """
-    user_in = UserLogin(username=form_data.username, password=form_data.password)
     token = await user_service.authenticate_user(user_in)
     return success_response(token)

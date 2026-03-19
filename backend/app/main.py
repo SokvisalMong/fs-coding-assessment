@@ -34,10 +34,9 @@ app = FastAPI(
 @app.exception_handler(AppException)
 async def app_exception_handler(request: Request, exc: AppException):
     """Handle application exceptions and return standardized error response."""
-    return error_response(
-        message=exc.message,
+    return JSONResponse(
         status_code=exc.status_code,
-        details=exc.details,
+        content=error_response(exc.status_code, exc.message).model_dump(),
     )
 
 

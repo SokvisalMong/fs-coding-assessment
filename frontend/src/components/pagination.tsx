@@ -36,7 +36,10 @@ export function PaginationControls({
   const paginationLimits = [10, 20, 50, 100];
 
   const pagesToRender = (() => {
-    if (totalPages <= 0) return [] as Array<number | "ellipsis">;
+    if (totalPages <= 1) {
+      return [1] as Array<number | "ellipsis">;
+    }
+
     if (totalPages <= 7) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
@@ -137,7 +140,7 @@ export function PaginationControls({
               <PaginationNext
                 href="#"
                 hideText
-                className={clampedCurrentPage === totalPages ? "pointer-events-none opacity-50" : undefined}
+                className={clampedCurrentPage >= Math.max(totalPages, 1) ? "pointer-events-none opacity-50" : undefined}
                 onClick={(e) => {
                   e.preventDefault();
                   handlePageClick(clampedCurrentPage + 1);

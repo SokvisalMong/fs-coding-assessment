@@ -99,6 +99,34 @@ export default function Home() {
     });
   };
 
+  const resetToFirstPage = useCallback(() => {
+    setPagination((prev) => {
+      if (prev.page === 1) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        page: 1,
+      };
+    });
+  }, []);
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearch(value);
+    resetToFirstPage();
+  }, [resetToFirstPage]);
+
+  const handleStatusChange = useCallback((value: string) => {
+    setStatus(value);
+    resetToFirstPage();
+  }, [resetToFirstPage]);
+
+  const handlePriorityChange = useCallback((value: string) => {
+    setPriority(value);
+    resetToFirstPage();
+  }, [resetToFirstPage]);
+
   const fetchTodos = useCallback(async (options?: { append: boolean }) => {
     if (isFetchingRef.current) return;
 
@@ -135,11 +163,6 @@ export default function Home() {
       setPagination((prev) => ({ ...prev, page: prev.page + 1 }));
     }
   }, [isLoading, pagination.page, paginationMeta.total_pages]);
-
-  useEffect(() => {
-    // Reset page to 1 when filters or view changes
-    setPagination((prev) => ({ ...prev, page: 1 }));
-  }, [debouncedSearch, priority, status, view]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -368,7 +391,7 @@ export default function Home() {
                 placeholder="Search"
                 value={search}
                 autoComplete="off"
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 />
               <InputGroupAddon>
                 <MagnifyingGlassIcon />
@@ -388,7 +411,7 @@ export default function Home() {
             {/* Status */}
             <div className="flex flex-col gap-1.5 w-full sm:w-auto">
               <Label htmlFor="status">Status</Label>
-              <Select value={status} onValueChange={setStatus}>
+              <Select value={status} onValueChange={handleStatusChange}>
                 <SelectTrigger id="status" aria-label="Filter by Status" className="w-full sm:!min-w-32">
                   <SelectValue placeholder="Status"/>
                 </SelectTrigger>
@@ -407,7 +430,7 @@ export default function Home() {
             {/* Priority */}
             <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:flex-1">
               <Label>Priority</Label>
-              <Select value={priority} onValueChange={setPriority}>
+              <Select value={priority} onValueChange={handlePriorityChange}>
                 <SelectTrigger aria-label="Filter by Priority" className="w-full sm:!min-w-32">
                   <SelectValue placeholder="Priority"/>
                 </SelectTrigger>

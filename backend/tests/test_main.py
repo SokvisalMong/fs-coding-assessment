@@ -178,3 +178,27 @@ class TestOpenAPIDocumentation:
 
         assert response.status_code == 200
         assert "text/html" in response.headers["content-type"]
+
+
+class TestApiJsonContentType:
+    """Ensure API endpoints return JSON responses."""
+
+    @pytest.mark.parametrize(
+        ("method", "path", "payload"),
+        [
+            ("get", "/", None),
+            ("get", "/health", None),
+            ("post", "/api/v1/auth/login", {"username": "x", "password": "short"}),
+            (
+                "post",
+                "/api/v1/auth/register",
+                {"username": "x", "email": "invalid", "password": "short"},
+            ),
+            ("get", "/api/v1/todos", None),
+            ("get", "/api/v1/users/me", None),
+        ],
+    )
+    def test_api_endpoints_return_json(self, client: TestClient, method: str, path: str, payload):
+        response = client.request(method, path, json=payload)
+
+        assert "application/json" in response.headers["content-type"]

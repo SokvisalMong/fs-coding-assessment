@@ -3,7 +3,7 @@ from typing import Annotated
 
 import jwt
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
 
@@ -13,21 +13,20 @@ from app.models.user import User, UserStatus
 from app.schemas.auth import TokenPayload
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/oauth2")
+http_bearer = HTTPBearer()
 
 settings = get_settings()
 
 
-TokenDep = Annotated[str, Depends(oauth2_scheme)]
+TokenDep = Annotated[HTTPAuthorizationCredentials, Depends(http_bearer)]
 
 
 async def get_current_user(token: TokenDep, user_service: UserServiceDep) -> User:
     try:
         payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+            token.credentials, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
         token_data = TokenPayload(**payload)
-        print(token_data)
     except (InvalidTokenError, ValidationError):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

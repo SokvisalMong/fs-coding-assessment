@@ -24,7 +24,7 @@ export async function login(payload: LoginPayload) {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    maxAge: response.data.expires_in || 3600,
+    maxAge: response.data.expires_in,
     path: "/",
   });
 
