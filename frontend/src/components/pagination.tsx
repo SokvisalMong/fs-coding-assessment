@@ -75,9 +75,9 @@ export function PaginationControls({
     <div className="flex flex-row gap-4 items-end justify-between w-full">
       {/* Pagination limits */}
       <div className="flex flex-col gap-1.5 items-start">
-        <Label className="text-nowrap">Items Per Page</Label>
+        <Label id="items-per-page-label" className="text-nowrap">Items Per Page</Label>
         <Select value={itemsPerPage.toString()} onValueChange={(value) => onItemsPerPageChange(Number(value))}>
-          <SelectTrigger className="w-full sm:w-20">
+          <SelectTrigger aria-labelledby="items-per-page-label" className="w-full sm:w-20">
             <SelectValue/>
           </SelectTrigger>
           <SelectContent>

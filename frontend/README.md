@@ -88,7 +88,7 @@ Build comprehensive todo interface:
 #### Todo Item Features
 
 - [x] View todo details (only owner)
-- [ ] Quick complete/uncomplete toggle (only owner)
+- [x] Quick complete/uncomplete toggle (only owner)
 - [x] Editing capability (only owner)
 - [x] Delete with confirmation modal (only owner)
 - [x] Visual indicators for:
@@ -101,7 +101,7 @@ Build comprehensive todo interface:
   - Title (required, max 200 chars)
   - Description (textarea)
   - Priority selector
-- [ ] Real-time validation
+- [x] Real-time validation
 - [x] Cancel and save actions
 - [x] Form dirty state handling (warn before leaving)
 
@@ -123,16 +123,16 @@ Implement production-ready UX patterns:
 
 ### Task 4: Accessibility & UX
 
-- [ ] Semantic HTML throughout
-- [ ] ARIA labels and roles
-- [ ] Keyboard navigation support (Tab, Enter, Escape)
-- [ ] Screen reader friendly
+- [x] Semantic HTML throughout
+- [x] ARIA labels and roles
+- [x] Keyboard navigation support (Tab, Enter, Escape)
+- [x] Screen reader friendly
 
 ### Task 5: Responsive Design
 
 Using Tailwind CSS:
 
-- [ ] Mobile-first approach
+- [x] Mobile-first approach
 - [x] Adaptive layouts (grid/flex)
 - [x] Work on multiple device sizes
 

@@ -207,6 +207,7 @@ export function TodoForm({
 
   const form = useForm<TodoFormValues>({
     resolver: zodResolver(formSchema),
+    mode: "onChange",
     defaultValues: getDefaultValues(todo),
   })
   const hasUnsavedChanges = isOpen && !isReadOnly && !isTodoDataLoading && form.formState.isDirty;

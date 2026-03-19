@@ -392,12 +392,12 @@ export default function Home() {
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between w-full gap-4 sm:gap-0 mt-2">
           {/* Filter */}
-          <div className="flex flex-col sm:flex-row gap-4 sm:gap-2 w-full sm:w-auto">
+          <div className="flex flex-row gap-4 sm:gap-2 w-full sm:w-auto">
             {/* Status */}
             <div className="flex flex-col gap-1.5 w-full sm:w-auto">
               <Label htmlFor="status">Status</Label>
               <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger id="status" className="w-full sm:!min-w-32">
+                <SelectTrigger id="status" aria-label="Filter by Status" className="w-full sm:!min-w-32">
                   <SelectValue placeholder="Status"/>
                 </SelectTrigger>
                 <SelectContent className="!max-w-32 !min-w-32">
@@ -416,7 +416,7 @@ export default function Home() {
             <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:flex-1">
               <Label>Priority</Label>
               <Select value={priority} onValueChange={setPriority}>
-                <SelectTrigger className="w-full sm:!min-w-32">
+                <SelectTrigger aria-label="Filter by Priority" className="w-full sm:!min-w-32">
                   <SelectValue placeholder="Priority"/>
                 </SelectTrigger>
                 <SelectContent className="!max-w-32 !min-w-32">
@@ -544,4 +544,3 @@ export default function Home() {
     </Card>
   )
 }
-

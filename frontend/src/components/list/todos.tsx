@@ -88,25 +88,29 @@ export function TodosList({ todos = [], onViewTodo, onDeleteTodo, onUpdateStatus
               <div 
                 key={todo.id} 
                 ref={isLast ? lastElementRef : null}
-                className="flex flex-col gap-3 rounded-lg border p-4 shadow-sm bg-card hover:bg-accent/10 transition-colors"
+                className="relative flex flex-col gap-3 rounded-lg border p-4 shadow-sm bg-card hover:bg-accent/10 transition-colors"
               >
-                <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-                  <div className="flex-1 min-w-0 w-full">
+                <div className="absolute top-4 right-4 flex items-center gap-1.5 text-sm">
+                  <span className="text-muted-foreground hidden sm:inline">Status:</span>
+                  <Badge 
+                    className={`${statusClassMap[todo.status]} ${todo.owner_id === authUserId ? "cursor-pointer hover:opacity-80" : ""}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (todo.owner_id === authUserId) onUpdateStatus?.(todo);
+                    }}
+                  >
+                    {formatLabel(todo.status)}
+                  </Badge>
+                </div>
+
+                <div className="flex flex-col gap-4">
+                  <div className="flex-1 min-w-0 w-full pr-24 sm:pr-28">
                     <h3 className="font-semibold text-lg truncate">{todo.title}</h3>
                     <p className="text-muted-foreground text-sm line-clamp-2 mt-1 min-h-[1.25rem]">
                       {todo.description || "HIDDEN"}
                     </p>
                   </div>
-                  <div className="flex flex-wrap items-center justify-start sm:justify-end gap-x-4 gap-y-2 shrink-0 w-full sm:w-auto">
-                    <div className="flex items-center gap-1.5 text-sm">
-                      <span className="text-muted-foreground">Status:</span>
-                      <Badge 
-                        className={`${statusClassMap[todo.status]} ${todo.owner_id === authUserId ? "cursor-pointer hover:opacity-80" : ""}`}
-                        onClick={() => todo.owner_id === authUserId && onUpdateStatus?.(todo)}
-                      >
-                        {formatLabel(todo.status)}
-                      </Badge>
-                    </div>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
                     {todo.priority && (
                       <div className="flex items-center gap-1.5 text-sm">
                         <span className="text-muted-foreground">Priority:</span>
@@ -125,7 +129,7 @@ export function TodosList({ todos = [], onViewTodo, onDeleteTodo, onUpdateStatus
                     </div>
                   </div>
             </div>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 text-sm mt-3 sm:mt-1">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 text-sm">
               <div className="text-muted-foreground flex items-center gap-1">
                 {todo.due_date ? (
                   <>

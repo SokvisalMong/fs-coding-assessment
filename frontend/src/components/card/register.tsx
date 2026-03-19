@@ -60,6 +60,7 @@ export function RegisterCard() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    mode: "onChange",
     defaultValues: {
       username: "",
       email: "",

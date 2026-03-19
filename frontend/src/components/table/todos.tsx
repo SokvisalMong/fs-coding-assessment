@@ -124,11 +124,11 @@ export function TodosTable({ todos = [], onViewTodo, onDeleteTodo, onUpdateStatu
                   <TableCell className="text-center whitespace-nowrap">
                     {todo.owner_id === authUserId && (
                       <div className="flex items-center justify-center gap-2">
-                        <Button type="button" variant="outline" size="xs" onClick={() => onViewTodo?.(todo.id)}>
+                        <Button aria-label="View todo" type="button" variant="outline" size="xs" onClick={() => onViewTodo?.(todo.id)}>
                           <EyeIcon/>
                         </Button>
 
-                        <Button type="button" variant="outline" size="xs" onClick={() => onDeleteTodo?.(todo)}>
+                        <Button aria-label="Delete todo" type="button" variant="outline" size="xs" onClick={() => onDeleteTodo?.(todo)}>
                           <TrashIcon/>
                         </Button>
                       </div>
