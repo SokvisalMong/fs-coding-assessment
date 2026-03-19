@@ -4,7 +4,7 @@ import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button";
-import { EyeSlashIcon, EyeIcon } from "@phosphor-icons/react";
+import { EyeSlashIcon, EyeIcon, CircleNotchIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LoginPayload } from "@/interfaces/auth.interface";
@@ -30,6 +30,7 @@ import {
   FieldGroup,
   FieldLabel
 } from "@/components/ui/field";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   username: z
@@ -43,6 +44,7 @@ const formSchema = z.object({
 })
 
 export function LoginCard() {
+  const [isLoading, setIsLoading] = useState(false);
   const [isShowingPassword, setIsShowingPassword] = useState(false);
   const router = useRouter();
 
@@ -61,9 +63,11 @@ export function LoginCard() {
     }
 
     try {
+      setIsLoading(true)
       const response = await login(payload)
       
       if (response.success) {
+        toast.success("Login successful");
         await useAuthStore.getState().initialize();
         router.push("/");
       }
@@ -71,6 +75,8 @@ export function LoginCard() {
       form.setError("root", {
         message: (error as Error).message
       });
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -123,8 +129,11 @@ export function LoginCard() {
               </FieldDescription>
             </Field>
 
-            <Button type="submit" className="w-full cursor-pointer">
+            <Button type="submit" className="w-full cursor-pointer" disabled={isLoading}>
               Login
+              {isLoading &&
+                <CircleNotchIcon data-icon="inline-end"/>
+              }
             </Button>
 
             {form.formState.errors.root && (

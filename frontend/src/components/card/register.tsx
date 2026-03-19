@@ -4,7 +4,7 @@ import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button";
-import { EyeSlashIcon, EyeIcon } from "@phosphor-icons/react";
+import { EyeSlashIcon, EyeIcon, CircleNotchIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { RegisterPayload } from "@/interfaces/auth.interface";
@@ -55,6 +55,7 @@ const formSchema = z.object({
 
 export function RegisterCard() {
   const [isShowingPassword, setIsShowingPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -75,6 +76,7 @@ export function RegisterCard() {
     }
 
     try {
+      setIsLoading(true)
       const response = await register(payload);
       if (response.success) {
         toast.success("User registered sucessfully.")
@@ -84,6 +86,8 @@ export function RegisterCard() {
       form.setError("root", {
         message: (error as Error).message
       });
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -169,8 +173,11 @@ export function RegisterCard() {
               </FieldDescription>
             </Field>
 
-            <Button type="submit" className="w-full cursor-pointer">
+            <Button type="submit" className="w-full cursor-pointer" disabled={isLoading}>
               Register
+              {isLoading &&
+                <CircleNotchIcon data-icon="inline-end"/>
+              }
             </Button>
 
             {form.formState.errors.root && (
