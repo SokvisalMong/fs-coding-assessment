@@ -1,12 +1,12 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback } from "react";
 import { Label } from "@/components/ui/label";
 import { MagnifyingGlassIcon, CircleNotchIcon, TableIcon, ListIcon } from "@phosphor-icons/react";
 import { STATUS } from "@/enums/status.enum";
 import { PRIORITY } from "@/enums/priority.enum";
 import { Todo } from "@/models/todo.model";
-import { deleteTodo, getTodo, paginateTodos, updateTodo } from "@/actions/todo";
+import { deleteTodo, updateTodo } from "@/actions/todo";
 import { toast } from "sonner";
 import { 
   Tabs,
@@ -32,7 +32,6 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import { PaginationMeta } from "@/interfaces/pagination.interface";
 import { PaginationControls } from "@/components/pagination";
 import { TodosTable } from "@/components/table/todos";
 import { TodosList } from "@/components/list/todos";
@@ -45,6 +44,10 @@ import {
 
 import { TodoDiscardAlert } from "@/components/dialog/todo-discard-alert";
 
+import { useTodos } from "@/hooks/use-todos";
+import { useTodoDialogs } from "@/hooks/use-todo-dialogs";
+import { useViewMode } from "@/hooks/use-view-mode";
+
 export default function Home() {
   const statusList = Object.values(STATUS).map((status) => ({
     label: status,
@@ -56,283 +59,57 @@ export default function Home() {
     value: priority,
   }))
 
-  const [search, setSearch] = useState<string>("");
-  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
-  const isFetchingRef = useRef(false);
-  const [view, setView] = useState<"table" | "list">("table");
+  const { view, setView } = useViewMode("table");
 
-  const [status, setStatus] = useState<string>('all');
-  const [priority, setPriority] = useState<string>('all');
-  const [todos, setTodos] = useState<Todo[]>([]);
-  const [isTodoDialogOpen, setIsTodoDialogOpen] = useState(false);
-  const [todoDialogMode, setTodoDialogMode] = useState<"create" | "view" | "edit">("create");
-  const [isTodoDialogLoading, setIsTodoDialogLoading] = useState(false);
-  const [hasUnsavedTodoChanges, setHasUnsavedTodoChanges] = useState(false);
-  const [isTodoDialogDiscardAlertOpen, setIsTodoDialogDiscardAlertOpen] = useState(false);
-  const [selectedTodo, setSelectedTodo] = useState<Todo | undefined>(undefined);
-  const [isTodoDeleteDialogOpen, setIsTodoDeleteDialogOpen] = useState(false);
-  const [todoPendingDelete, setTodoPendingDelete] = useState<Todo | undefined>(undefined);
-  const todoViewRequestIdRef = useRef(0);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 20,
-  });
-  const [paginationMeta, setPaginationMeta] = useState<PaginationMeta>({
-    current_page: 1,
-    total_pages: 1,
-    total_count: 0,
-    items_per_page: 20
-  })
+  const {
+    todos,
+    search,
+    setSearch,
+    status,
+    setStatus,
+    priority,
+    setPriority,
+    isLoading,
+    pagination,
+    paginationMeta,
+    handlePageChange,
+    handleItemsPerPageChange,
+    loadMore,
+    fetchTodos,
+    handleOptimisticTodoCreated,
+    handleOptimisticTodoFailed,
+    handleOptimisticTodoUpdated,
+    handleOptimisticTodoUpdateFailed,
+    handleOptimisticTodoDeleted,
+    handleOptimisticTodoDeleteFailed,
+  } = useTodos();
 
-  const handlePageChange = (page: number) => {
-    setPagination((prev) => ({
-      ...prev,
-      page,
-    }));
-  };
+  const {
+    isTodoDialogOpen,
+    setIsTodoDialogOpen,
+    todoDialogMode,
+    isTodoDialogLoading,
+    setHasUnsavedTodoChanges,
+    isTodoDialogDiscardAlertOpen,
+    setIsTodoDialogDiscardAlertOpen,
+    selectedTodo,
+    
+    isTodoDeleteDialogOpen,
+    setIsTodoDeleteDialogOpen,
+    todoPendingDelete,
 
-  const handleItemsPerPageChange = (limit: number) => {
-    setPagination({
-      page: 1,
-      limit,
-    });
-  };
-
-  const resetToFirstPage = useCallback(() => {
-    setPagination((prev) => {
-      if (prev.page === 1) {
-        return prev;
-      }
-
-      return {
-        ...prev,
-        page: 1,
-      };
-    });
-  }, []);
-
-  const handleSearchChange = useCallback((value: string) => {
-    setSearch(value);
-    resetToFirstPage();
-  }, [resetToFirstPage]);
-
-  const handleStatusChange = useCallback((value: string) => {
-    setStatus(value);
-    resetToFirstPage();
-  }, [resetToFirstPage]);
-
-  const handlePriorityChange = useCallback((value: string) => {
-    setPriority(value);
-    resetToFirstPage();
-  }, [resetToFirstPage]);
-
-  const fetchTodos = useCallback(async (options?: { append: boolean }) => {
-    if (isFetchingRef.current) return;
-
-    isFetchingRef.current = true;
-    try {
-      setIsLoading(true);
-      const response = await paginateTodos({
-        page: pagination.page,
-        limit: pagination.limit,
-        title: debouncedSearch || undefined,
-        priority: priority === "all" ? undefined : priority as PRIORITY,
-        status: status === "all" ? undefined : status as STATUS,
-      })
-
-      setTodos((prev) => options?.append ? [...prev, ...response.results] : response.results);
-      setPaginationMeta(response.meta)
-    } finally {
-      setIsLoading(false);
-      isFetchingRef.current = false;
-    }
-  }, [debouncedSearch, pagination.limit, pagination.page, priority, status])
-
-  const pendingAppendRef = useRef(false);
-
-  useEffect(() => {
-    fetchTodos({ append: pendingAppendRef.current });
-    pendingAppendRef.current = false;
-  }, [fetchTodos]);
-
-  const loadMore = useCallback(() => {
-    if (isLoading || isFetchingRef.current) return;
-    if (pagination.page < paginationMeta.total_pages) {
-      pendingAppendRef.current = true;
-      setPagination((prev) => ({ ...prev, page: prev.page + 1 }));
-    }
-  }, [isLoading, pagination.page, paginationMeta.total_pages]);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      const normalizedSearch = search.trim();
-
-      if (normalizedSearch.length >= 2) {
-        setDebouncedSearch(normalizedSearch);
-        return;
-      }
-
-      setDebouncedSearch("");
-    }, 400);
-
-    return () => clearTimeout(timeout);
-  }, [search]);
-
-  useEffect(() => {
-    fetchTodos();
-  }, [fetchTodos]);
-
-  const handleOptimisticTodoCreated = useCallback((todo: Todo) => {
-    setTodos((prevTodos) => [todo, ...prevTodos].slice(0, pagination.limit));
-    setPaginationMeta((prevMeta) => {
-      const nextTotalCount = prevMeta.total_count + 1;
-
-      return {
-        ...prevMeta,
-        total_count: nextTotalCount,
-        total_pages: Math.max(1, Math.ceil(nextTotalCount / pagination.limit)),
-      };
-    });
-  }, [pagination.limit]);
-
-  const handleOptimisticTodoFailed = useCallback((optimisticTodoId: string) => {
-    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== optimisticTodoId));
-    setPaginationMeta((prevMeta) => {
-      const nextTotalCount = Math.max(0, prevMeta.total_count - 1);
-
-      return {
-        ...prevMeta,
-        total_count: nextTotalCount,
-        total_pages: Math.max(1, Math.ceil(nextTotalCount / pagination.limit)),
-      };
-    });
-  }, [pagination.limit]);
+    performCloseTodoDialog,
+    requestCloseTodoDialog,
+    openCreateDialog,
+    openViewDialog,
+    
+    requestCloseDeleteDialog,
+    openDeleteDialog,
+  } = useTodoDialogs();
 
   const handleTodoCreateSuccess = useCallback(() => {
     fetchTodos();
   }, [fetchTodos]);
-
-  const handleOptimisticTodoUpdated = useCallback((optimisticTodo: Todo) => {
-    setTodos((prevTodos) =>
-      prevTodos.map((todo) => (todo.id === optimisticTodo.id ? optimisticTodo : todo))
-    );
-  }, []);
-
-  const handleOptimisticTodoUpdateFailed = useCallback((originalTodo: Todo) => {
-    setTodos((prevTodos) =>
-      prevTodos.map((todo) => (todo.id === originalTodo.id ? originalTodo : todo))
-    );
-  }, []);
-
-  const performCloseTodoDialog = useCallback(() => {
-    setIsTodoDialogOpen(false);
-    todoViewRequestIdRef.current += 1;
-    setSelectedTodo(undefined);
-    setIsTodoDialogLoading(false);
-    setHasUnsavedTodoChanges(false);
-    setIsTodoDialogDiscardAlertOpen(false);
-  }, []);
-
-  const requestCloseTodoDialog = useCallback(() => {
-    if (hasUnsavedTodoChanges) {
-      setIsTodoDialogDiscardAlertOpen(true);
-      return;
-    }
-
-    performCloseTodoDialog();
-  }, [hasUnsavedTodoChanges, performCloseTodoDialog]);
-
-  const openCreateDialog = useCallback(() => {
-    todoViewRequestIdRef.current += 1;
-    setTodoDialogMode("create");
-    setSelectedTodo(undefined);
-    setIsTodoDialogLoading(false);
-    setHasUnsavedTodoChanges(false);
-    setIsTodoDialogDiscardAlertOpen(false);
-    setIsTodoDialogOpen(true);
-  }, []);
-
-  const openViewDialog = useCallback(async (todoId: string) => {
-    todoViewRequestIdRef.current += 1;
-    const requestId = todoViewRequestIdRef.current;
-
-    setTodoDialogMode("view");
-    setSelectedTodo(undefined);
-    setIsTodoDialogLoading(true);
-    setHasUnsavedTodoChanges(false);
-    setIsTodoDialogDiscardAlertOpen(false);
-    setIsTodoDialogOpen(true);
-
-    try {
-      const todo = await getTodo(todoId);
-
-      if (requestId !== todoViewRequestIdRef.current) {
-        return;
-      }
-
-      setSelectedTodo(todo);
-    } catch (error) {
-      if (requestId !== todoViewRequestIdRef.current) {
-        return;
-      }
-
-      toast.error("Failed to fetch todo", {
-        description: (error as Error).message,
-      });
-      performCloseTodoDialog();
-    } finally {
-      if (requestId === todoViewRequestIdRef.current) {
-        setIsTodoDialogLoading(false);
-      }
-    }
-  }, [performCloseTodoDialog]);
-
-  const performCloseDeleteDialog = useCallback(() => {
-    setIsTodoDeleteDialogOpen(false);
-    setTodoPendingDelete(undefined);
-  }, []);
-
-  const requestCloseDeleteDialog = useCallback(() => {
-    performCloseDeleteDialog();
-  }, [performCloseDeleteDialog]);
-
-  const openDeleteDialog = useCallback((todo: Todo) => {
-    setTodoPendingDelete(todo);
-    setIsTodoDeleteDialogOpen(true);
-  }, []);
-
-  const handleOptimisticTodoDeleted = useCallback((todoToDelete: Todo) => {
-    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== todoToDelete.id));
-    setPaginationMeta((prevMeta) => {
-      const nextTotalCount = Math.max(0, prevMeta.total_count - 1);
-
-      return {
-        ...prevMeta,
-        total_count: nextTotalCount,
-        total_pages: Math.max(1, Math.ceil(nextTotalCount / pagination.limit)),
-      };
-    });
-  }, [pagination.limit]);
-
-  const handleOptimisticTodoDeleteFailed = useCallback((todoToRestore: Todo) => {
-    setTodos((prevTodos) => {
-      if (prevTodos.some((todo) => todo.id === todoToRestore.id)) {
-        return prevTodos;
-      }
-
-      return [todoToRestore, ...prevTodos].slice(0, pagination.limit);
-    });
-    setPaginationMeta((prevMeta) => {
-      const nextTotalCount = prevMeta.total_count + 1;
-
-      return {
-        ...prevMeta,
-        total_count: nextTotalCount,
-        total_pages: Math.max(1, Math.ceil(nextTotalCount / pagination.limit)),
-      };
-    });
-  }, [pagination.limit]);
 
   const handleTodoDeleteSuccess = useCallback(() => {
     fetchTodos();
@@ -391,7 +168,7 @@ export default function Home() {
                 placeholder="Search"
                 value={search}
                 autoComplete="off"
-                onChange={(e) => handleSearchChange(e.target.value)}
+                onChange={(e) => setSearch(e.target.value)}
                 />
               <InputGroupAddon>
                 <MagnifyingGlassIcon />
@@ -411,7 +188,7 @@ export default function Home() {
             {/* Status */}
             <div className="flex flex-col gap-1.5 w-full sm:w-auto">
               <Label htmlFor="status">Status</Label>
-              <Select value={status} onValueChange={handleStatusChange}>
+              <Select value={status} onValueChange={setStatus}>
                 <SelectTrigger id="status" aria-label="Filter by Status" className="w-full sm:!min-w-32">
                   <SelectValue placeholder="Status"/>
                 </SelectTrigger>
@@ -430,7 +207,7 @@ export default function Home() {
             {/* Priority */}
             <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:flex-1">
               <Label>Priority</Label>
-              <Select value={priority} onValueChange={handlePriorityChange}>
+              <Select value={priority} onValueChange={setPriority}>
                 <SelectTrigger aria-label="Filter by Priority" className="w-full sm:!min-w-32">
                   <SelectValue placeholder="Priority"/>
                 </SelectTrigger>
@@ -450,7 +227,7 @@ export default function Home() {
 
           {/* View */}
           <div className="flex w-full sm:w-auto mt-4 sm:mt-0 justify-end md:justify-start">
-            <Tabs defaultValue="table" onValueChange={(value) => setView(value as "table" | "list")} className="w-full sm:w-auto">
+            <Tabs value={view} onValueChange={(value) => setView(value as "table" | "list")} className="w-full sm:w-auto">
               <TabsList className="grid w-full grid-cols-2 sm:inline-flex">
                 <TabsTrigger value="table">
                   <TableIcon/>
