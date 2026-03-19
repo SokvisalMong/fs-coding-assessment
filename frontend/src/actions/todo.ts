@@ -2,7 +2,8 @@
 
 import type { 
   PaginateTodosPayload,
-  CreateTodoPayload
+  CreateTodoPayload,
+  UpdateTodoPayload,
 } from "@/interfaces/todo.interface";
 import { Todo } from "@/models/todo.model";
 import { apiRequest } from "@/lib/api.server";
@@ -37,9 +38,26 @@ export async function getTodo(id: string) {
   return response.data;
 }
 
+export async function updateTodo(id: string, payload: UpdateTodoPayload) {
+  const response = await apiRequest<Todo>({
+    method: "patch",
+    endpoint: `todos/${id}`,
+    data: payload,
+  })
+
+  return response.data;
+}
+
 export async function deleteTodo(id: string) {
   await apiRequest({
     method: "delete",
     endpoint: `todos/${id}`
+  })
+}
+
+export async function completeTodo(id: string) {
+  await apiRequest<Todo>({
+    method: "patch",
+    endpoint: `todos/${id}/complete`,
   })
 }

@@ -12,6 +12,7 @@ export const apiRequest = async <T> ({
   data,
 }: BaseRequestParams) => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const requestMethod = method.toUpperCase();
 
   const requestHeaders: HeadersInit = {
     "Content-Type": "application/json",
@@ -44,7 +45,7 @@ export const apiRequest = async <T> ({
   }
 
   const response = await fetch(requestUrl, {
-    method,
+    method: requestMethod,
     headers: requestHeaders,
     body:
       method === "get"
@@ -65,7 +66,15 @@ export const apiRequest = async <T> ({
     } as BaseResponse<T>;
   }
 
-  const responseData: BaseResponse<T> = await response.json();
+  const rawResponse = await response.text();
+  let responseData: BaseResponse<T>;
+
+  try {
+    responseData = JSON.parse(rawResponse) as BaseResponse<T>;
+  } catch {
+    const message = rawResponse.slice(0, 300) || "Empty response body";
+    throw new Error(`Invalid API response (${response.status}): ${message}`);
+  }
 
   const { code, message } = responseData;
 

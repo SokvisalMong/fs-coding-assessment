@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/card";
 import {
   Field,
-  FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel
 } from "@/components/ui/field";
@@ -112,9 +112,9 @@ export function RegisterCard() {
               <InputGroup>
                 <InputGroupInput placeholder="Username" {...form.register("username")} />
               </InputGroup>
-              <FieldDescription className="text-destructive">
+              <FieldError className="text-destructive">
                 {form.formState.errors.username ? form.formState.errors.username.message : ""}
-              </FieldDescription>
+              </FieldError>
             </Field>
             {/* Email */}
             <Field>
@@ -122,9 +122,9 @@ export function RegisterCard() {
               <InputGroup>
                 <InputGroupInput placeholder="Email" {...form.register("email")} />
               </InputGroup>
-              <FieldDescription className="text-destructive">
+              <FieldError className="text-destructive">
                 {form.formState.errors.email ? form.formState.errors.email.message : ""}
-              </FieldDescription>
+              </FieldError>
             </Field>
             {/* Password */}
             <Field>
@@ -145,9 +145,9 @@ export function RegisterCard() {
                   </InputGroupButton>
                 </InputGroupAddon>
               </InputGroup>
-              <FieldDescription className="text-destructive">
+              <FieldError className="text-destructive">
                 {form.formState.errors.password ? form.formState.errors.password.message : ""}
-              </FieldDescription>
+              </FieldError>
             </Field>
             {/* Confirm Password */}
             <Field>
@@ -168,9 +168,9 @@ export function RegisterCard() {
                   </InputGroupButton>
                 </InputGroupAddon>
               </InputGroup>
-              <FieldDescription className="text-destructive">
+              <FieldError className="text-destructive">
                 {form.formState.errors.confirmPassword ? form.formState.errors.confirmPassword.message : ""}
-              </FieldDescription>
+              </FieldError>
             </Field>
 
             <Button type="submit" className="w-full cursor-pointer" disabled={isLoading}>
@@ -181,9 +181,9 @@ export function RegisterCard() {
             </Button>
 
             {form.formState.errors.root && (
-               <FieldDescription className="text-destructive">
+               <FieldError className="text-destructive">
                  {form.formState.errors.root.message}
-               </FieldDescription>
+               </FieldError>
             )}
           </FieldGroup>
         </form>

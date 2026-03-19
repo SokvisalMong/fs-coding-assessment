@@ -6,9 +6,8 @@ import { MagnifyingGlassIcon, CircleNotchIcon, TableIcon, ListIcon } from "@phos
 import { STATUS } from "@/enums/status.enum";
 import { PRIORITY } from "@/enums/priority.enum";
 import { Todo } from "@/models/todo.model";
-import { paginateTodos } from "@/actions/todo";
+import { deleteTodo, getTodo, paginateTodos } from "@/actions/todo";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { 
   Tabs,
   TabsList,
@@ -20,6 +19,7 @@ import {
   CardFooter, 
   CardHeader 
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { 
   InputGroup,
   InputGroupAddon,
@@ -36,6 +36,22 @@ import { PaginationMeta } from "@/interfaces/pagination.interface";
 import { PaginationControls } from "@/components/pagination";
 import { TodosTable } from "@/components/table/todos";
 import { TodosList } from "@/components/list/todos";
+import { TodoForm } from "@/components/dialog/todo-form";
+import { TodoDeleteDialog } from "@/components/dialog/todo-delete";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
 
 export default function Home() {
   const statusList = Object.values(STATUS).map((status) => ({
@@ -57,6 +73,15 @@ export default function Home() {
   const [status, setStatus] = useState<string>('all');
   const [priority, setPriority] = useState<string>('all');
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [isTodoDialogOpen, setIsTodoDialogOpen] = useState(false);
+  const [todoDialogMode, setTodoDialogMode] = useState<"create" | "view" | "edit">("create");
+  const [isTodoDialogLoading, setIsTodoDialogLoading] = useState(false);
+  const [hasUnsavedTodoChanges, setHasUnsavedTodoChanges] = useState(false);
+  const [isTodoDialogDiscardAlertOpen, setIsTodoDialogDiscardAlertOpen] = useState(false);
+  const [selectedTodo, setSelectedTodo] = useState<Todo | undefined>(undefined);
+  const [isTodoDeleteDialogOpen, setIsTodoDeleteDialogOpen] = useState(false);
+  const [todoPendingDelete, setTodoPendingDelete] = useState<Todo | undefined>(undefined);
+  const todoViewRequestIdRef = useRef(0);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 20,
@@ -127,8 +152,163 @@ export default function Home() {
     fetchTodos();
   }, [fetchTodos]);
 
+  const handleOptimisticTodoCreated = useCallback((todo: Todo) => {
+    setTodos((prevTodos) => [todo, ...prevTodos].slice(0, pagination.limit));
+    setPaginationMeta((prevMeta) => {
+      const nextTotalCount = prevMeta.total_count + 1;
+
+      return {
+        ...prevMeta,
+        total_count: nextTotalCount,
+        total_pages: Math.max(1, Math.ceil(nextTotalCount / pagination.limit)),
+      };
+    });
+  }, [pagination.limit]);
+
+  const handleOptimisticTodoFailed = useCallback((optimisticTodoId: string) => {
+    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== optimisticTodoId));
+    setPaginationMeta((prevMeta) => {
+      const nextTotalCount = Math.max(0, prevMeta.total_count - 1);
+
+      return {
+        ...prevMeta,
+        total_count: nextTotalCount,
+        total_pages: Math.max(1, Math.ceil(nextTotalCount / pagination.limit)),
+      };
+    });
+  }, [pagination.limit]);
+
+  const handleTodoCreateSuccess = useCallback(() => {
+    fetchTodos();
+  }, [fetchTodos]);
+
+  const handleOptimisticTodoUpdated = useCallback((optimisticTodo: Todo) => {
+    setTodos((prevTodos) =>
+      prevTodos.map((todo) => (todo.id === optimisticTodo.id ? optimisticTodo : todo))
+    );
+  }, []);
+
+  const handleOptimisticTodoUpdateFailed = useCallback((originalTodo: Todo) => {
+    setTodos((prevTodos) =>
+      prevTodos.map((todo) => (todo.id === originalTodo.id ? originalTodo : todo))
+    );
+  }, []);
+
+  const performCloseTodoDialog = useCallback(() => {
+    setIsTodoDialogOpen(false);
+    todoViewRequestIdRef.current += 1;
+    setSelectedTodo(undefined);
+    setIsTodoDialogLoading(false);
+    setHasUnsavedTodoChanges(false);
+    setIsTodoDialogDiscardAlertOpen(false);
+  }, []);
+
+  const requestCloseTodoDialog = useCallback(() => {
+    if (hasUnsavedTodoChanges) {
+      setIsTodoDialogDiscardAlertOpen(true);
+      return;
+    }
+
+    performCloseTodoDialog();
+  }, [hasUnsavedTodoChanges, performCloseTodoDialog]);
+
+  const openCreateDialog = useCallback(() => {
+    todoViewRequestIdRef.current += 1;
+    setTodoDialogMode("create");
+    setSelectedTodo(undefined);
+    setIsTodoDialogLoading(false);
+    setHasUnsavedTodoChanges(false);
+    setIsTodoDialogDiscardAlertOpen(false);
+    setIsTodoDialogOpen(true);
+  }, []);
+
+  const openViewDialog = useCallback(async (todoId: string) => {
+    todoViewRequestIdRef.current += 1;
+    const requestId = todoViewRequestIdRef.current;
+
+    setTodoDialogMode("view");
+    setSelectedTodo(undefined);
+    setIsTodoDialogLoading(true);
+    setHasUnsavedTodoChanges(false);
+    setIsTodoDialogDiscardAlertOpen(false);
+    setIsTodoDialogOpen(true);
+
+    try {
+      const todo = await getTodo(todoId);
+
+      if (requestId !== todoViewRequestIdRef.current) {
+        return;
+      }
+
+      setSelectedTodo(todo);
+    } catch (error) {
+      if (requestId !== todoViewRequestIdRef.current) {
+        return;
+      }
+
+      toast.error("Failed to fetch todo", {
+        description: (error as Error).message,
+      });
+      performCloseTodoDialog();
+    } finally {
+      if (requestId === todoViewRequestIdRef.current) {
+        setIsTodoDialogLoading(false);
+      }
+    }
+  }, [performCloseTodoDialog]);
+
+  const performCloseDeleteDialog = useCallback(() => {
+    setIsTodoDeleteDialogOpen(false);
+    setTodoPendingDelete(undefined);
+  }, []);
+
+  const requestCloseDeleteDialog = useCallback(() => {
+    performCloseDeleteDialog();
+  }, [performCloseDeleteDialog]);
+
+  const openDeleteDialog = useCallback((todo: Todo) => {
+    setTodoPendingDelete(todo);
+    setIsTodoDeleteDialogOpen(true);
+  }, []);
+
+  const handleOptimisticTodoDeleted = useCallback((todoToDelete: Todo) => {
+    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== todoToDelete.id));
+    setPaginationMeta((prevMeta) => {
+      const nextTotalCount = Math.max(0, prevMeta.total_count - 1);
+
+      return {
+        ...prevMeta,
+        total_count: nextTotalCount,
+        total_pages: Math.max(1, Math.ceil(nextTotalCount / pagination.limit)),
+      };
+    });
+  }, [pagination.limit]);
+
+  const handleOptimisticTodoDeleteFailed = useCallback((todoToRestore: Todo) => {
+    setTodos((prevTodos) => {
+      if (prevTodos.some((todo) => todo.id === todoToRestore.id)) {
+        return prevTodos;
+      }
+
+      return [todoToRestore, ...prevTodos].slice(0, pagination.limit);
+    });
+    setPaginationMeta((prevMeta) => {
+      const nextTotalCount = prevMeta.total_count + 1;
+
+      return {
+        ...prevMeta,
+        total_count: nextTotalCount,
+        total_pages: Math.max(1, Math.ceil(nextTotalCount / pagination.limit)),
+      };
+    });
+  }, [pagination.limit]);
+
+  const handleTodoDeleteSuccess = useCallback(() => {
+    fetchTodos();
+  }, [fetchTodos]);
+
   return (
-    <Card className="w-full max-w-xl mx-auto">
+    <Card className="w-full max-w-4xl">
       <CardHeader className="flex flex-col gap-2">
         {/* Search */}
         <div className="flex flex-col gap-1.5 w-full">
@@ -150,9 +330,7 @@ export default function Home() {
                 }
               </InputGroupAddon>
             </InputGroup>
-            <Button className="w-16">
-              Create
-            </Button>
+            <Button type="button" onClick={openCreateDialog}>Create</Button>
           </div>
         </div>
         <div className="flex flex-row items-end justify-between w-full">
@@ -215,27 +393,87 @@ export default function Home() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="h-[50vh] overflow-y-scroll flex flex-col gap-2">
+      <CardContent className="h-[50vh] overflow-y-auto flex flex-col gap-2">
         {view === "table" && (
-          <TodosTable todos={todos} isLoading={isLoading} />
+          <TodosTable todos={todos} onViewTodo={openViewDialog} onDeleteTodo={openDeleteDialog}/>
         )}
         {view === "list" && (
-          <TodosList />
+          <TodosList todos={todos} onViewTodo={openViewDialog} onDeleteTodo={openDeleteDialog}/>
         )}
       </CardContent>
-      {view === "table" && (
-        <CardFooter>
-          {/* Pagination controls */}
-          <PaginationControls
-            itemsPerPage={pagination.limit}
-            totalPages={paginationMeta.total_pages}
-            currentPage={pagination.page}
-            itemCount={paginationMeta.total_count}
-            onPageChange={handlePageChange}
-            onItemsPerPageChange={handleItemsPerPageChange}
-            />
-        </CardFooter>
-      )}
+      <CardFooter>
+        {/* Pagination controls */}
+        <PaginationControls
+          itemsPerPage={pagination.limit}
+          totalPages={paginationMeta.total_pages}
+          currentPage={pagination.page}
+          itemCount={paginationMeta.total_count}
+          onPageChange={handlePageChange}
+          onItemsPerPageChange={handleItemsPerPageChange}
+          />
+      </CardFooter>
+
+      <Dialog
+        open={isTodoDialogOpen}
+        onOpenChange={(open) => {
+          if (open) {
+            setIsTodoDialogOpen(true);
+            return;
+          }
+
+          requestCloseTodoDialog();
+        }}
+      >
+        <DialogContent>
+          <TodoForm
+            isOpen={isTodoDialogOpen}
+            isTodoLoading={isTodoDialogLoading}
+            mode={todoDialogMode}
+            todo={selectedTodo}
+            onOptimisticCreate={handleOptimisticTodoCreated}
+            onCreateFailed={handleOptimisticTodoFailed}
+            onOptimisticUpdate={handleOptimisticTodoUpdated}
+            onUpdateFailed={handleOptimisticTodoUpdateFailed}
+            onDirtyChange={setHasUnsavedTodoChanges}
+            onCancel={requestCloseTodoDialog}
+            onClose={performCloseTodoDialog}
+            onSuccess={handleTodoCreateSuccess}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={isTodoDialogDiscardAlertOpen} onOpenChange={setIsTodoDialogDiscardAlertOpen}>
+        <AlertDialogContent size="sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Discard unsaved changes?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes. If you leave now, your changes will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep editing</AlertDialogCancel>
+            <AlertDialogAction onClick={performCloseTodoDialog}>Discard</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <TodoDeleteDialog
+        open={isTodoDeleteDialogOpen}
+        todo={todoPendingDelete}
+        onOpenChange={(open) => {
+          if (open) {
+            setIsTodoDeleteDialogOpen(true);
+            return;
+          }
+
+          requestCloseDeleteDialog();
+        }}
+        onCancel={requestCloseDeleteDialog}
+        onDelete={deleteTodo}
+        onOptimisticDelete={handleOptimisticTodoDeleted}
+        onOptimisticDeleteFailed={handleOptimisticTodoDeleteFailed}
+        onSuccess={handleTodoDeleteSuccess}
+      />
     </Card>
   )
 }

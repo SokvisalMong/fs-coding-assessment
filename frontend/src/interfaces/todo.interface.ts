@@ -14,3 +14,11 @@ export interface CreateTodoPayload {
   priority?: PRIORITY;
   due_date?: string; // "2023-10-27T10:00:00Z"
 }
+
+export interface UpdateTodoPayload {
+  title?: string;
+  description?: string;
+  status?: STATUS;
+  priority?: PRIORITY;
+  due_date?: string;
+}

@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/card";
 import {
   Field,
-  FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel
 } from "@/components/ui/field";
@@ -101,9 +101,9 @@ export function LoginCard() {
               <InputGroup>
                 <InputGroupInput placeholder="Username" {...form.register("username")} />
               </InputGroup>
-              <FieldDescription className="text-destructive">
+              <FieldError>
                 {form.formState.errors.username ? form.formState.errors.username.message : ""}
-              </FieldDescription>
+              </FieldError>
             </Field>
             {/* Password */}
             <Field>
@@ -124,9 +124,9 @@ export function LoginCard() {
                   </InputGroupButton>
                 </InputGroupAddon>
               </InputGroup>
-              <FieldDescription className="text-destructive">
+              <FieldError>
                 {form.formState.errors.password ? form.formState.errors.password.message : ""}
-              </FieldDescription>
+              </FieldError>
             </Field>
 
             <Button type="submit" className="w-full cursor-pointer" disabled={isLoading}>
@@ -136,11 +136,9 @@ export function LoginCard() {
               }
             </Button>
 
-            {form.formState.errors.root && (
-              <FieldDescription className="text-destructive">
-                {form.formState.errors.root.message}
-              </FieldDescription>
-            )}
+            <FieldError>
+              {form.formState.errors.root?.message}
+            </FieldError>
           </FieldGroup>
         </form>
       </CardContent>
