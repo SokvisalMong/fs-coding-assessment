@@ -39,19 +39,11 @@ import { TodosList } from "@/components/list/todos";
 import { TodoForm } from "@/components/dialog/todo-form";
 import { TodoDeleteDialog } from "@/components/dialog/todo-delete";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
   Dialog,
   DialogContent,
 } from "@/components/ui/dialog";
+
+import { TodoDiscardAlert } from "@/components/dialog/todo-discard-alert";
 
 export default function Home() {
   const statusList = Object.values(STATUS).map((status) => ({
@@ -509,20 +501,11 @@ export default function Home() {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={isTodoDialogDiscardAlertOpen} onOpenChange={setIsTodoDialogDiscardAlertOpen}>
-        <AlertDialogContent size="sm">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Discard unsaved changes?</AlertDialogTitle>
-            <AlertDialogDescription>
-              You have unsaved changes. If you leave now, your changes will be lost.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Keep editing</AlertDialogCancel>
-            <AlertDialogAction onClick={performCloseTodoDialog}>Discard</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <TodoDiscardAlert
+        open={isTodoDialogDiscardAlertOpen}
+        onOpenChange={setIsTodoDialogDiscardAlertOpen}
+        onDiscard={performCloseTodoDialog}
+      />
 
       <TodoDeleteDialog
         open={isTodoDeleteDialogOpen}
@@ -532,7 +515,6 @@ export default function Home() {
             setIsTodoDeleteDialogOpen(true);
             return;
           }
-
           requestCloseDeleteDialog();
         }}
         onCancel={requestCloseDeleteDialog}

@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from app.core.config import get_settings
 from app.routers import auth, todos, users
 from app.utils.response import error_response, success_response
+from app.exceptions.base import AppException
 
 
 settings = get_settings()
@@ -28,6 +29,16 @@ app = FastAPI(
     lifespan=lifespan,
     openapi_url="/openapi.json",
 )
+
+
+@app.exception_handler(AppException)
+async def app_exception_handler(request: Request, exc: AppException):
+    """Handle application exceptions and return standardized error response."""
+    return error_response(
+        message=exc.message,
+        status_code=exc.status_code,
+        details=exc.details,
+    )
 
 
 # Middleware

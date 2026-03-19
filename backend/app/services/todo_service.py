@@ -1,5 +1,5 @@
 import uuid
-from fastapi import HTTPException, status
+from fastapi import status
 
 from app.models.todo import Priority, Todo, TodoStatus
 from app.repositories.todo_repository import TodoRepository
@@ -7,6 +7,7 @@ from app.schemas.todo import TodoCreate, TodoFilterParams, TodoPriorityStats, To
 from app.schemas.pagination import PaginationParams
 from app.utils.pagination import paginate_query
 from app.schemas.response import PaginatedData
+from app.exceptions.base import NotFoundException, ForbiddenException
 
 
 class TodoService:
@@ -20,15 +21,11 @@ class TodoService:
     async def get_todo_by_id(self, todo_id: uuid.UUID, current_user_id: uuid.UUID) -> Todo:
         todo = await self.todo_repository.get_todo_by_id(todo_id)
         if not todo:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Todo not found",
-            )
+            raise NotFoundException(message="Todo not found")
+        
         if todo.owner_id != current_user_id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Not authorized to access this todo",
-            )
+            raise ForbiddenException(message="Not authorized to access this todo")
+        
         return todo
 
     async def get_all_todos(
@@ -59,29 +56,20 @@ class TodoService:
     ) -> Todo:
         todo = await self.todo_repository.get_todo_by_id(todo_id)
         if not todo:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Todo not found",
-            )
+            raise NotFoundException(message="Todo not found")
+        
         if todo.owner_id != current_user_id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Not authorized to update this todo",
-            )
+            raise ForbiddenException(message="Not authorized to update this todo")
+        
         return await self.todo_repository.update_todo(todo, todo_in)
 
     async def complete_todo(self, todo_id: uuid.UUID, current_user_id: uuid.UUID) -> Todo:
         todo = await self.todo_repository.get_todo_by_id(todo_id)
         if not todo:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Todo not found",
-            )
+            raise NotFoundException(message="Todo not found")
+        
         if todo.owner_id != current_user_id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Not authorized to complete this todo",
-            )
+            raise ForbiddenException(message="Not authorized to complete this todo")
         
         if todo.status == TodoStatus.NOT_STARTED:
             new_status = TodoStatus.IN_PROGRESS
@@ -98,15 +86,11 @@ class TodoService:
     async def delete_todo(self, todo_id: uuid.UUID, current_user_id: uuid.UUID) -> None:
         todo = await self.todo_repository.get_todo_by_id(todo_id)
         if not todo:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Todo not found",
-            )
+            raise NotFoundException(message="Todo not found")
+        
         if todo.owner_id != current_user_id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Not authorized to delete this todo",
-            )
+            raise ForbiddenException(message="Not authorized to delete this todo")
+        
         await self.todo_repository.delete_todo(todo)
 
     async def get_todo_stats(self, owner_id: uuid.UUID) -> TodoStats:

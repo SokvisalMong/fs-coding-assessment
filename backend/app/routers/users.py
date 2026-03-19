@@ -19,6 +19,11 @@ async def get_users(
     page: int = Query(default=1, ge=1),
     items_per_page: int = Query(default=10, ge=1, le=100),
 ):
+    """
+    List all users.
+    
+    Includes pagination. Requires authentication.
+    """
     users, total_count = await user_service.get_users(
         page=page, items_per_page=items_per_page
     )
@@ -32,6 +37,9 @@ async def get_users(
 
 @router.get("/me", response_model=ApiResponse[UserRead])
 def get_me(current_user: CurrentUserDep):
+    """
+    Get the profile of the currently logged-in user.
+    """
     return success_response(current_user)
 
 
@@ -39,6 +47,9 @@ def get_me(current_user: CurrentUserDep):
 async def get_user(
     user_id: uuid.UUID, user_service: UserServiceDep, current_user: CurrentUserDep
 ):
+    """
+    Get details for a specific user.
+    """
     user = await user_service.get_user(user_id)
     return success_response(user)
 

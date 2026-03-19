@@ -1,7 +1,7 @@
 import uuid
 from datetime import timedelta
 
-from fastapi import HTTPException, status
+from fastapi import status
 
 from app.core import security
 from app.core.config import get_settings
@@ -9,6 +9,7 @@ from app.models.user import UserStatus
 from app.repositories.user_repository import UserRepository
 from app.schemas.auth import AuthToken
 from app.schemas.user import UserCreate, UserLogin, UserRead, UserRegister, UserUpdate
+from app.exceptions.base import BadRequestException, UnauthorizedException, NotFoundException
 
 
 class UserService:
@@ -18,15 +19,9 @@ class UserService:
 
     async def register_user(self, user_in: UserRegister) -> UserRead:
         if await self.user_repository.get_user_by_username(user_in.username):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Username already registered",
-            )
+            raise BadRequestException(message="Username already registered")
         if user_in.email and await self.user_repository.get_user_by_email(user_in.email):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already registered",
-            )
+            raise BadRequestException(message="Email already registered")
 
         user_create = UserCreate(
             username=user_in.username,
@@ -49,17 +44,10 @@ class UserService:
             username=user_in.username, password=user_in.password
         )
         if not user:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Invalid username or password",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+            raise UnauthorizedException(message="Invalid username or password")
 
         elif not user.status == UserStatus.ACTIVE:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"{user.status.value.capitalize()} user",
-            )
+            raise BadRequestException(message=f"{user.status.value.capitalize()} user")
 
         access_token_expires = timedelta(
             minutes=self.settings.ACCESS_TOKEN_EXPIRE_MINUTES
@@ -76,9 +64,7 @@ class UserService:
     async def get_user(self, user_id: uuid.UUID) -> UserRead:
         user = await self.user_repository.get_user(user_id)
         if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-            )
+            raise NotFoundException(message="User not found")
         return user
 
     async def get_users(

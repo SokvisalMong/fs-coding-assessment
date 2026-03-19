@@ -91,7 +91,6 @@ export function TodosList({ todos = [], onViewTodo, onDeleteTodo, onUpdateStatus
                 className="relative flex flex-col gap-3 rounded-lg border p-4 shadow-sm bg-card hover:bg-accent/10 transition-colors"
               >
                 <div className="absolute top-4 right-4 flex items-center gap-1.5 text-sm">
-                  <span className="text-muted-foreground hidden sm:inline">Status:</span>
                   <Badge 
                     className={`${statusClassMap[todo.status]} ${todo.owner_id === authUserId ? "cursor-pointer hover:opacity-80" : ""}`}
                     onClick={(e) => {

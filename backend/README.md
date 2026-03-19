@@ -204,9 +204,9 @@ uv run pytest tests/test_todos.py -v
 
 ### Database
 
-- [ ] Foreign key constraint added with migration
-- [ ] Database indexes on `user_id`
-- [ ] Proper async database sessions
+- [x] Foreign key constraint added with migration
+- [x] Database indexes on `user_id`
+- [x] Proper async database sessions
 
 ## Submission
 
