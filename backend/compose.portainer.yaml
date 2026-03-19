@@ -1,0 +1,14 @@
+services:
+  api:
+    build: .
+    container_name: todo-api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      # Connects to the host machine bypassing the container's localhost mapping assuming you have a postgres server running
+      - DATABASE_URL=postgresql+asyncpg://postgres:password@host.docker.internal:5432/dev_todo_db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
