@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { UserProfile } from "./user-profile";
+import { UserProfile } from "@/components/user-profile";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (

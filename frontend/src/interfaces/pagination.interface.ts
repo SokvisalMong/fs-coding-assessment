@@ -12,5 +12,5 @@ export interface PaginationMeta {
 
 export interface Paginate<Data> {
   meta: PaginationMeta;
-  data: Data[];
+  results: Data[];
 }

@@ -36,6 +36,13 @@ export async function login(payload: LoginPayload) {
 }
 
 export async function getCurrentUser() {
+  const cookieStore = await cookies();
+  const authToken = cookieStore.get("authToken");
+
+  if (!authToken) {
+    return null;
+  }
+
   const response = await apiRequest<User>({
     method: "get",
     endpoint: "users/me",

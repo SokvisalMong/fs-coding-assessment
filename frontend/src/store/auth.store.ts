@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { User } from "@/models/user.model";
 import { getClientCurrentUser } from "@/lib/auth-client";
 import { logoutAction } from "@/actions/auth";
+import { toast } from "sonner";
 
 interface AuthState {
   user: User | null;
@@ -27,8 +28,8 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     try {
       const user = await getClientCurrentUser();
       set({ user, isAuthenticated: !!user, isInitialized: true });
-    } catch (error: any) {
-      if (error.message === "UNAUTHORIZED") {
+    } catch (error) {
+      if ((error as Error).message === "UNAUTHORIZED") {
         get().handleUnauthorized();
       } else {
         console.error("Auth initialization failed:", error);
@@ -51,7 +52,6 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       toast.error("Session expired", {
         description: "Please login again to continue.",
       });
-      // Use window.location for a full refresh and redirect to ensure clean state
       window.location.href = "/login";
     }
   },
