@@ -176,7 +176,7 @@ export function RegisterCard() {
             <Button type="submit" className="w-full cursor-pointer" disabled={isLoading}>
               Register
               {isLoading &&
-                <CircleNotchIcon data-icon="inline-end"/>
+                <CircleNotchIcon data-icon="inline-end" className="animate-spin"/>
               }
             </Button>
 

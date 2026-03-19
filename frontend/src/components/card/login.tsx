@@ -132,7 +132,7 @@ export function LoginCard() {
             <Button type="submit" className="w-full cursor-pointer" disabled={isLoading}>
               Login
               {isLoading &&
-                <CircleNotchIcon data-icon="inline-end"/>
+                <CircleNotchIcon data-icon="inline-end" className="animate-spin"/>
               }
             </Button>
 
