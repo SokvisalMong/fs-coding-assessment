@@ -42,6 +42,28 @@ This assessment evaluates your ability to build a **production-grade RESTful API
 
 The API will be available at `http://localhost:8000`
 
+### Database
+
+Start db container
+```bash
+docker compose up -d db
+```
+
+Stop db container
+```bash
+docker compose down
+```
+
+Apply migrations
+```bash
+uv run alembic upgrade head
+```
+
+Make migration changes
+```bash
+uv run alembic revision --autogenerate -m "describe_change"
+```
+
 ## Required Tasks
 
 ### Task 1: Database Relationship - Connect Todo and User Tables
@@ -158,33 +180,33 @@ uv run pytest tests/test_todos.py -v
 
 ### Core Requirements (Must Complete)
 
-- [ ] **Task 1**: Add foreign key relationship between Todo and User tables
-- [ ] **Task 2**: Implement all 6 Todo CRUD endpoints
-  - [ ] POST /api/v1/todos (Create)
-  - [ ] GET /api/v1/todos (List all - hide description for non-owners, pagination, filtering, search)
-  - [ ] GET /api/v1/todos/{id} (Get single - owner only)
-  - [ ] PATCH /api/v1/todos/{id} (Update - owner only)
-  - [ ] DELETE /api/v1/todos/{id} (Delete - owner only)
-  - [ ] PATCH /api/v1/todos/{id}/complete (Mark complete - owner only)
-- [ ] **Task 3**: Implement GET /api/v1/todos/stats endpoint
-- [ ] **Task 4**: Write tests in `tests/test_todos.py`
-  - [ ] test_create_todo_success
-  - [ ] test_get_all_todos (verify description hiding for non-owners)
+- [x] **Task 1**: Add foreign key relationship between Todo and User tables
+- [x] **Task 2**: Implement all 6 Todo CRUD endpoints
+  - [x] POST /api/v1/todos (Create)
+  - [x] GET /api/v1/todos (List all - hide description for non-owners, pagination, filtering, search)
+  - [x] GET /api/v1/todos/{id} (Get single - owner only)
+  - [x] PATCH /api/v1/todos/{id} (Update - owner only)
+  - [x] DELETE /api/v1/todos/{id} (Delete - owner only)
+  - [x] PATCH /api/v1/todos/{id}/complete (Mark complete - owner only)
+- [x] **Task 3**: Implement GET /api/v1/todos/stats endpoint
+- [x] **Task 4**: Write tests in `tests/test_todos.py`
+  - [x] test_create_todo_success
+  - [x] test_get_all_todos (verify description hiding for non-owners)
 
 ### Code Quality
 
-- [ ] Type hints on all functions
-- [ ] Proper error handling with custom exceptions
-- [ ] Docstrings on all endpoints
-- [ ] Follow RESTful conventions
-- [ ] Use proper HTTP status codes
-- [ ] Input validation with Pydantic
+- [x] Type hints on all functions
+- [x] Proper error handling with custom exceptions
+- [x] Docstrings on all endpoints
+- [x] Follow RESTful conventions
+- [x] Use proper HTTP status codes
+- [x] Input validation with Pydantic
 
 ### Database
 
-- [ ] Foreign key constraint added with migration
-- [ ] Database indexes on `user_id`
-- [ ] Proper async database sessions
+- [x] Foreign key constraint added with migration
+- [x] Database indexes on `user_id`
+- [x] Proper async database sessions
 
 ## Submission
 
@@ -256,12 +278,12 @@ uv run pytest tests/test_todos.py -v --cov=app --cov-report=html --cov-report=te
 
 Before submitting, ensure:
 
-- [ ] All 4 core tasks are completed
-- [ ] Application starts without errors
-- [ ] All tests pass (`uv run pytest tests/ -v`)
-- [ ] Test coverage is at least 70% for todo endpoints
-- [ ] API documentation at `/docs` shows all endpoints
-- [ ] Foreign key relationship exists between Todo and User
-- [ ] Both required test cases are implemented and passingtodos
-- [ ] Stats endpoint returns correct calculations
-- [ ] Code follows Python best practices (type hints, docstrings)
+- [x] All 4 core tasks are completed
+- [x] Application starts without errors
+- [x] All tests pass (`uv run pytest tests/ -v`)
+- [x] Test coverage is at least 70% for todo endpoints
+- [x] API documentation at `/docs` shows all endpoints
+- [x] Foreign key relationship exists between Todo and User
+- [x] Both required test cases are implemented and passingtodos
+- [x] Stats endpoint returns correct calculations
+- [x] Code follows Python best practices (type hints, docstrings)

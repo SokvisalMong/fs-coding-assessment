@@ -14,6 +14,11 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     LOG_LEVEL: str = "INFO"
 
+    DATABASE_POOL_SIZE: int
+    DATABASE_MAX_OVERFLOW: int
+    DATABASE_POOL_TIMEOUT: int
+    DATABASE_POOL_RECYCLE: int
+
     model_config = SettingsConfigDict(env_file=".env")
 
 

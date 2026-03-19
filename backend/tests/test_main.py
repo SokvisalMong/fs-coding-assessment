@@ -21,10 +21,11 @@ class TestRootEndpoint:
 
         assert response.status_code == 200
         data = response.json()
-        assert "message" in data
-        assert data["message"] == "Todo API is running!"
-        assert data["version"] == "1.0.0"
-        assert data["docs"] == "/docs"
+        assert data["code"] == 200
+        assert data["message"] == "ok"
+        assert data["data"]["message"] == "Todo API is running!"
+        assert data["data"]["version"] == "1.0.0"
+        assert data["data"]["docs"] == "/docs"
 
     def test_root_returns_json_content_type(self, client: TestClient):
         response = client.get("/")
@@ -40,7 +41,9 @@ class TestHealthEndpoint:
 
         assert response.status_code == 200
         data = response.json()
-        assert data == {"status": "ok"}
+        assert data["code"] == 200
+        assert data["message"] == "ok"
+        assert data["data"] == {"status": "ok"}
 
     def test_health_check_returns_json_content_type(self, client: TestClient):
         response = client.get("/health")
@@ -175,3 +178,27 @@ class TestOpenAPIDocumentation:
 
         assert response.status_code == 200
         assert "text/html" in response.headers["content-type"]
+
+
+class TestApiJsonContentType:
+    """Ensure API endpoints return JSON responses."""
+
+    @pytest.mark.parametrize(
+        ("method", "path", "payload"),
+        [
+            ("get", "/", None),
+            ("get", "/health", None),
+            ("post", "/api/v1/auth/login", {"username": "x", "password": "short"}),
+            (
+                "post",
+                "/api/v1/auth/register",
+                {"username": "x", "email": "invalid", "password": "short"},
+            ),
+            ("get", "/api/v1/todos", None),
+            ("get", "/api/v1/users/me", None),
+        ],
+    )
+    def test_api_endpoints_return_json(self, client: TestClient, method: str, path: str, payload):
+        response = client.request(method, path, json=payload)
+
+        assert "application/json" in response.headers["content-type"]
