@@ -140,6 +140,7 @@ export function RegisterCard() {
                   <InputGroupButton
                     type="button"
                     className="cursor-pointer"
+                    tabIndex={-1}
                     onClick={() => setIsShowingPassword(!isShowingPassword)}
                   >
                     {isShowingPassword ? <EyeIcon/> : <EyeSlashIcon/>}
@@ -163,6 +164,7 @@ export function RegisterCard() {
                   <InputGroupButton
                     type="button"
                     className="cursor-pointer"
+                    tabIndex={-1}
                     onClick={() => setIsShowingPassword(!isShowingPassword)}
                     >
                     {isShowingPassword ? <EyeIcon/> : <EyeSlashIcon/>}
