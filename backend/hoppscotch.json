@@ -1,0 +1,388 @@
+{
+  "v": 11,
+  "id": "cmmra7qs62n3oh81l4xwzoxy5",
+  "name": "fs-assessment",
+  "folders": [
+    {
+      "v": 11,
+      "id": "cmmra7uff2n3ph81lnj3v446v",
+      "name": "Auth",
+      "folders": [],
+      "requests": [
+        {
+          "v": "17",
+          "name": "Register",
+          "method": "POST",
+          "endpoint": "<<baseapi>>/auth/register",
+          "params": [],
+          "headers": [],
+          "preRequestScript": "",
+          "testScript": "",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "contentType": "application/json",
+            "body": "{\n  \"username\": \"dizzy\",\n  \"password\": \"password\",\n  \"email\": \"dizzy@gmail.com\" // optional\n}"
+          },
+          "requestVariables": [],
+          "responses": {
+            "Register": {
+              "name": "Register",
+              "originalRequest": {
+                "v": "6",
+                "name": "Register",
+                "method": "POST",
+                "endpoint": "<<baseapi>>/auth/register",
+                "headers": [],
+                "params": [],
+                "body": {
+                  "contentType": "application/json",
+                  "body": "{\n  \"username\": \"dizzy\",\n  \"password\": \"password\",\n  \"email\": \"dizzy@gmail.com\" // optional\n}"
+                },
+                "auth": {
+                  "authType": "none",
+                  "authActive": true
+                },
+                "requestVariables": []
+              },
+              "status": "Created",
+              "code": 201,
+              "headers": [
+                {
+                  "key": "access-control-allow-credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "content-length",
+                  "value": "234"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "date",
+                  "value": "Wed, 18 Mar 2026 10:19:05 GMT"
+                },
+                {
+                  "key": "server",
+                  "value": "uvicorn"
+                }
+              ],
+              "body": "{\"code\":201,\"message\":\"created\",\"data\":{\"created_at\":\"2026-03-18T10:19:07.256652Z\",\"updated_at\":\"2026-03-18T10:19:07.256664Z\",\"email\":\"dizzy@gmail.com\",\"username\":\"dizzy\",\"status\":\"ACTIVE\",\"id\":\"102709bb-163d-4781-998a-62d1d7cd5b46\"}}"
+            }
+          },
+          "description": null
+        },
+        {
+          "v": "17",
+          "name": "Login",
+          "method": "POST",
+          "endpoint": "<<baseapi>>/auth/login",
+          "params": [],
+          "headers": [],
+          "preRequestScript": "",
+          "testScript": "pw.env.set(\"access_token\", pw.response.body.data.access_token);",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "contentType": "application/json",
+            "body": "{\n  \"username\": \"vizzy\",\n  \"password\": \"password\"\n}"
+          },
+          "requestVariables": [],
+          "responses": {},
+          "description": null
+        },
+        {
+          "v": "17",
+          "name": "Me",
+          "method": "GET",
+          "endpoint": "<<baseapi>>/users/me",
+          "params": [],
+          "headers": [
+            {
+              "key": "Authorization",
+              "value": "Bearer <<access_token>>",
+              "active": true,
+              "description": ""
+            }
+          ],
+          "preRequestScript": "",
+          "testScript": "",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "contentType": null,
+            "body": null
+          },
+          "requestVariables": [],
+          "responses": {},
+          "description": null
+        }
+      ],
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "headers": [],
+      "variables": [],
+      "description": null
+    },
+    {
+      "v": 11,
+      "id": "cmmw2hr683xm6gy1mpx7yn1h0",
+      "name": "Todos",
+      "folders": [],
+      "requests": [
+        {
+          "v": "17",
+          "name": "Create Todo",
+          "method": "POST",
+          "endpoint": "<<baseapi>>/todos",
+          "params": [],
+          "headers": [
+            {
+              "key": "Authorization",
+              "value": "Bearer <<access_token>>",
+              "active": true,
+              "description": ""
+            }
+          ],
+          "preRequestScript": "",
+          "testScript": "",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "contentType": "application/json",
+            "body": "{\n  \"title\": \"Test 1\",\n  \"description\": \"Description 1\",\n  \"priority\": \"MEDIUM\", // optional (enum: LOW, MEDIUM, HIGH)\n  \"due_date\": \"2023-10-27T10:00:00Z\" // optional\n}"
+          },
+          "requestVariables": [],
+          "responses": {},
+          "description": null
+        },
+        {
+          "v": "17",
+          "name": "Paginate Todos",
+          "method": "GET",
+          "endpoint": "<<baseapi>>/todos",
+          "params": [
+            {
+              "key": "limit",
+              "value": "20",
+              "active": true,
+              "description": ""
+            },
+            {
+              "key": "page",
+              "value": "1",
+              "active": true,
+              "description": ""
+            },
+            {
+              "key": "title",
+              "value": "test",
+              "active": false,
+              "description": "optional"
+            },
+            {
+              "key": "status",
+              "value": "NOT_STARTED",
+              "active": false,
+              "description": "optional (enum: NOT_STARTED, IN_PROGRESS, COMPLETED)"
+            },
+            {
+              "key": "priority",
+              "value": "MEDIUM",
+              "active": false,
+              "description": "optional (enum: LOW, MEDIUM, HIGH"
+            }
+          ],
+          "headers": [
+            {
+              "key": "Authorization",
+              "value": "Bearer <<access_token>>",
+              "active": true,
+              "description": ""
+            }
+          ],
+          "preRequestScript": "",
+          "testScript": "",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "contentType": null,
+            "body": null
+          },
+          "requestVariables": [],
+          "responses": {},
+          "description": null
+        },
+        {
+          "v": "17",
+          "name": "Get Todo",
+          "method": "GET",
+          "endpoint": "<<baseapi>>/todos/7ba53ea7-9ae3-47da-a68e-b951e343b65d",
+          "params": [],
+          "headers": [
+            {
+              "key": "Authorization",
+              "value": "Bearer <<access_token>>",
+              "active": true,
+              "description": ""
+            }
+          ],
+          "preRequestScript": "",
+          "testScript": "",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "contentType": null,
+            "body": null
+          },
+          "requestVariables": [],
+          "responses": {},
+          "description": null
+        },
+        {
+          "v": "17",
+          "name": "Delete Todo",
+          "method": "DELETE",
+          "endpoint": "<<baseapi>>/todos/07483e6d-5a0a-4983-98f4-f2fb60d15601",
+          "params": [],
+          "headers": [
+            {
+              "key": "Authorization",
+              "value": "Bearer <<access_token>>",
+              "active": true,
+              "description": ""
+            }
+          ],
+          "preRequestScript": "",
+          "testScript": "",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "contentType": null,
+            "body": null
+          },
+          "requestVariables": [],
+          "responses": {},
+          "description": null
+        },
+        {
+          "v": "17",
+          "name": "Update Todo",
+          "method": "PATCH",
+          "endpoint": "<<baseapi>>/todos/id",
+          "params": [],
+          "headers": [
+            {
+              "key": "Authorization",
+              "value": "Bearer <<access_token>>",
+              "active": true,
+              "description": ""
+            }
+          ],
+          "preRequestScript": "",
+          "testScript": "",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "contentType": "application/json",
+            "body": "{\n  \"title\": \"Test 1\", // optional\n  \"description\": \"Description 1\", // optional\n  \"priority\": \"MEDIUM\", // optional (enum: LOW, MEDIUM, HIGH)\n  \"due_date\": \"2023-10-27T10:00:00Z\" // optional\n}"
+          },
+          "requestVariables": [],
+          "responses": {},
+          "description": null
+        },
+        {
+          "v": "17",
+          "name": "Complete Todo",
+          "method": "PATCH",
+          "endpoint": "<<baseapi>>/todos/7ba53ea7-9ae3-47da-a68e-b951e343b65d/complete",
+          "params": [],
+          "headers": [
+            {
+              "key": "Authorization",
+              "value": "Bearer <<access_token>>",
+              "active": true,
+              "description": ""
+            }
+          ],
+          "preRequestScript": "",
+          "testScript": "",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "contentType": null,
+            "body": null
+          },
+          "requestVariables": [],
+          "responses": {},
+          "description": null
+        },
+        {
+          "v": "17",
+          "name": "Get Stats",
+          "method": "GET",
+          "endpoint": "<<baseapi>>/todos/stats",
+          "params": [],
+          "headers": [
+            {
+              "key": "Authorization",
+              "value": "Bearer <<access_token>>",
+              "active": true,
+              "description": ""
+            }
+          ],
+          "preRequestScript": "",
+          "testScript": "",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "contentType": null,
+            "body": null
+          },
+          "requestVariables": [],
+          "responses": {},
+          "description": null
+        }
+      ],
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "headers": [],
+      "variables": [],
+      "description": null
+    }
+  ],
+  "requests": [],
+  "auth": {
+    "authType": "inherit",
+    "authActive": true
+  },
+  "headers": [],
+  "variables": [],
+  "description": null
+}

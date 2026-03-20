@@ -42,6 +42,8 @@ This assessment evaluates your ability to build a **production-grade RESTful API
 
 The API will be available at `http://localhost:8000`
 
+There is also an available `hoppscotch.json` collection you can import at `https://hoppscotch.io/`
+
 ### Database
 
 Start db container
