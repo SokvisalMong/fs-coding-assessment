@@ -103,6 +103,7 @@ export function TodoForm({
 }: TodoFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isReadOnly, setIsReadOnly] = useState(mode === "view");
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const authUserId = useAuthStore((state) => state.user?.id);
   const isTodoDataLoading = mode !== "create" && isTodoLoading;
 
@@ -347,7 +348,7 @@ export function TodoForm({
               {/* Due Date */}
               <Field>
                 <FieldLabel>Due Date</FieldLabel>
-                <Popover>
+                <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                   <PopoverTrigger asChild>
                     <Button
                       type="button"
@@ -366,10 +367,10 @@ export function TodoForm({
                       selected={form.watch("dueDate") ? new Date(form.watch("dueDate")!) : undefined}
                       onSelect={(date) => {
                         const nextValue = date?.toISOString() ?? "";
-                        if (form.getValues("dueDate") === nextValue) {
-                          return;
+                        if (form.getValues("dueDate") !== nextValue) {
+                          form.setValue("dueDate", nextValue, { shouldDirty: true, shouldTouch: true });
                         }
-                        form.setValue("dueDate", nextValue, { shouldDirty: true, shouldTouch: true });
+                        setIsCalendarOpen(false);
                       }}
                     />
                   </PopoverContent>
