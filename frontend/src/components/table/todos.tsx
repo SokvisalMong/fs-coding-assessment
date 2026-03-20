@@ -9,10 +9,10 @@ import {
   TableHeader,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/badges/status-badge";
+import { PriorityBadge } from "@/components/badges/priority-badge";
+import { OwnerBadge } from "@/components/badges/owner-badge";
 import { Todo } from "@/models/todo.model";
-import { PRIORITY } from "@/enums/priority.enum";
-import { STATUS } from "@/enums/status.enum";
 import { useAuthStore } from "@/store/auth.store";
 import { EyeIcon, TrashIcon } from "@phosphor-icons/react";
 
@@ -22,25 +22,6 @@ interface TodosListTableProps {
   onDeleteTodo?: (todo: Todo) => void;
   onUpdateStatus?: (todo: Todo) => void;
 }
-
-const statusClassMap: Record<STATUS, string> = {
-  [STATUS.NOT_STARTED]: "bg-slate-200 text-slate-800",
-  [STATUS.IN_PROGRESS]: "bg-blue-200 text-blue-800",
-  [STATUS.COMPLETED]: "bg-emerald-200 text-emerald-800",
-};
-
-const priorityClassMap: Record<PRIORITY, string> = {
-  [PRIORITY.LOW]: "bg-zinc-200 text-zinc-800",
-  [PRIORITY.MEDIUM]: "bg-amber-200 text-amber-800",
-  [PRIORITY.HIGH]: "bg-rose-200 text-rose-800",
-};
-
-const formatLabel = (value: string) =>
-  value
-    .toLowerCase()
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
 
 const formatDate = (value: string | null) => {
   if (!value) {
@@ -65,20 +46,19 @@ export function TodosTable({ todos = [], onViewTodo, onDeleteTodo, onUpdateStatu
   const isEmpty = safeTodos.length === 0;
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="w-full overflow-x-auto">
-        <Table className="w-full min-w-[800px] table-fixed">
-          <colgroup>
-            <col className="w-[16%]" />
-            <col className="w-[21%]" />
-            <col className="w-[14%]" />
-            <col className="w-[10%]" />
-            <col className="w-[10%]" />
-            <col className="w-[8%]" />
-            <col className="w-[10%]" />
-          </colgroup>
-          <TableHeader>
-            <TableRow>
+    <div className="h-full flex flex-col overflow-hidden">
+      <Table className="w-full min-w-[800px] table-fixed" containerClassName="flex-1 overflow-auto">
+        <colgroup>
+          <col className="w-[16%]" />
+          <col className="w-[21%]" />
+          <col className="w-[14%]" />
+          <col className="w-[10%]" />
+          <col className="w-[10%]" />
+          <col className="w-[8%]" />
+          <col className="w-[10%]" />
+        </colgroup>
+        <TableHeader className="sticky top-0 z-10 bg-background shadow-[0_1px_0_hsl(var(--border))]">
+          <TableRow className="hover:bg-transparent">
               <TableHead>Title</TableHead>
               <TableHead>Description</TableHead>
               <TableHead className="text-center">Status</TableHead>
@@ -97,29 +77,29 @@ export function TodosTable({ todos = [], onViewTodo, onDeleteTodo, onUpdateStatu
                     {todo.description || "HIDDEN"}
                   </TableCell>
                   <TableCell className="text-center overflow-hidden">
-                    <Badge 
-                      className={`${statusClassMap[todo.status]} max-w-full overflow-hidden text-ellipsis whitespace-nowrap ${todo.owner_id === authUserId ? "cursor-pointer hover:opacity-80" : ""}`}
-                      onClick={() => todo.owner_id === authUserId && onUpdateStatus?.(todo)}
-                    >
-                      {formatLabel(todo.status)}
-                    </Badge>
+                    <StatusBadge 
+                      status={todo.status}
+                      className={`w-full max-w-full overflow-hidden text-ellipsis whitespace-nowrap ${todo.owner_id === authUserId ? "cursor-pointer hover:opacity-80" : "cursor-not-allowed"}`}
+                      isInteractive={todo.owner_id === authUserId}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (todo.owner_id === authUserId) onUpdateStatus?.(todo);
+                      }}
+                    />
                   </TableCell>
                   <TableCell className="text-center overflow-hidden">
                     {todo.priority ? (
-                      <Badge className={`${priorityClassMap[todo.priority]} max-w-full overflow-hidden text-ellipsis whitespace-nowrap`}>
-                        {formatLabel(todo.priority)}
-                      </Badge>
+                      <PriorityBadge priority={todo.priority} className="max-w-full overflow-hidden text-ellipsis whitespace-nowrap" />
                     ) : (
                       "-"
                     )}
                   </TableCell>
                   <TableCell className="text-center whitespace-nowrap">{formatDate(todo.due_date)}</TableCell>
                   <TableCell className="text-center overflow-hidden">
-                    {todo.owner_id === authUserId ? (
-                      <Badge className="bg-emerald-200 text-emerald-800 max-w-full overflow-hidden text-ellipsis whitespace-nowrap">You</Badge>
-                    ) : (
-                      <Badge className="bg-slate-200 text-slate-800 max-w-full overflow-hidden text-ellipsis whitespace-nowrap">Other</Badge>
-                    )}
+                    <OwnerBadge 
+                      isOwner={todo.owner_id === authUserId}
+                      className="max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
+                    />
                   </TableCell>
                   <TableCell className="text-center whitespace-nowrap">
                     {todo.owner_id === authUserId && (
@@ -139,7 +119,6 @@ export function TodosTable({ todos = [], onViewTodo, onDeleteTodo, onUpdateStatu
             </TableBody>
           ) : null}
         </Table>
-      </div>
 
       {isEmpty ? (
         <div className="flex-1 bg-card text-center text-muted-foreground flex items-center justify-center">

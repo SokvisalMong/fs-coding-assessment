@@ -2,10 +2,10 @@
 
 import { useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/badges/status-badge";
+import { PriorityBadge } from "@/components/badges/priority-badge";
+import { OwnerBadge } from "@/components/badges/owner-badge";
 import { Todo } from "@/models/todo.model";
-import { PRIORITY } from "@/enums/priority.enum";
-import { STATUS } from "@/enums/status.enum";
 import { useAuthStore } from "@/store/auth.store";
 import { EyeIcon, TrashIcon, CircleNotchIcon } from "@phosphor-icons/react";
 
@@ -18,25 +18,6 @@ interface TodosListProps {
   hasMore?: boolean;
   isLoading?: boolean;
 }
-
-const statusClassMap: Record<STATUS, string> = {
-  [STATUS.NOT_STARTED]: "bg-slate-200 text-slate-800",
-  [STATUS.IN_PROGRESS]: "bg-blue-200 text-blue-800",
-  [STATUS.COMPLETED]: "bg-emerald-200 text-emerald-800",
-};
-
-const priorityClassMap: Record<PRIORITY, string> = {
-  [PRIORITY.LOW]: "bg-zinc-200 text-zinc-800",
-  [PRIORITY.MEDIUM]: "bg-amber-200 text-amber-800",
-  [PRIORITY.HIGH]: "bg-rose-200 text-rose-800",
-};
-
-const formatLabel = (value: string) =>
-  value
-    .toLowerCase()
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
 
 const formatDate = (value: string | null) => {
   if (!value) {
@@ -91,15 +72,15 @@ export function TodosList({ todos = [], onViewTodo, onDeleteTodo, onUpdateStatus
                 className="relative flex flex-col gap-3 rounded-lg border p-4 shadow-sm bg-card hover:bg-accent/10 transition-colors"
               >
                 <div className="absolute top-4 right-4 flex items-center gap-1.5 text-sm">
-                  <Badge 
-                    className={`${statusClassMap[todo.status]} ${todo.owner_id === authUserId ? "cursor-pointer hover:opacity-80" : ""}`}
+                  <StatusBadge 
+                    status={todo.status}
+                    className={todo.owner_id === authUserId ? "cursor-pointer hover:opacity-80" : "cursor-not-allowed"}
+                    isInteractive={todo.owner_id === authUserId}
                     onClick={(e) => {
                       e.stopPropagation();
                       if (todo.owner_id === authUserId) onUpdateStatus?.(todo);
                     }}
-                  >
-                    {formatLabel(todo.status)}
-                  </Badge>
+                  />
                 </div>
 
                 <div className="flex flex-col gap-4">
@@ -113,18 +94,12 @@ export function TodosList({ todos = [], onViewTodo, onDeleteTodo, onUpdateStatus
                     {todo.priority && (
                       <div className="flex items-center gap-1.5 text-sm">
                         <span className="text-muted-foreground">Priority:</span>
-                        <Badge className={`${priorityClassMap[todo.priority]}`}>
-                          {formatLabel(todo.priority)}
-                        </Badge>
+                        <PriorityBadge priority={todo.priority} />
                       </div>
                     )}
                     <div className="flex items-center gap-1.5 text-sm">
                       <span className="text-muted-foreground">Owner:</span>
-                      {todo.owner_id === authUserId ? (
-                        <Badge className="bg-emerald-200 text-emerald-800">You</Badge>
-                      ) : (
-                        <Badge className="bg-slate-200 text-slate-800">Other</Badge>
-                      )}
+                      <OwnerBadge isOwner={todo.owner_id === authUserId} />
                     </div>
                   </div>
             </div>

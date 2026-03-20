@@ -34,14 +34,14 @@ export function useTodos() {
     setPagination({ page: 1, limit });
   }, []);
 
-  const fetchTodos = useCallback(async (options?: { append: boolean }) => {
+  const fetchTodos = useCallback(async (options?: { append?: boolean, page?: number }) => {
     if (isFetchingRef.current) return;
 
     isFetchingRef.current = true;
     try {
       setIsLoading(true);
       const response = await paginateTodos({
-        page: pagination.page,
+        page: options?.page ?? pagination.page,
         limit: pagination.limit,
         title: debouncedSearch || undefined,
         priority: priority === "all" ? undefined : priority as PRIORITY,
@@ -56,12 +56,37 @@ export function useTodos() {
     }
   }, [debouncedSearch, pagination.limit, pagination.page, priority, status]);
 
+  const resetPaginationAndRefetch = useCallback(() => {
+    setPagination((prev) => {
+      if (prev.page === 1) {
+        // If already on page 1, fetch manually
+        setTimeout(() => fetchTodos({ append: false, page: 1 }), 0);
+        return prev;
+      }
+      return { ...prev, page: 1 };
+    });
+  }, [fetchTodos]);
+
   const pendingAppendRef = useRef(false);
+  const prevFiltersRef = useRef({ debouncedSearch, priority, status });
 
   useEffect(() => {
-    fetchTodos({ append: pendingAppendRef.current });
+    let currentPage = pagination.page;
+    
+    // Check if filters changed
+    if (
+      prevFiltersRef.current.debouncedSearch !== debouncedSearch ||
+      prevFiltersRef.current.priority !== priority ||
+      prevFiltersRef.current.status !== status
+    ) {
+      currentPage = 1;
+      setPagination((prev) => ({ ...prev, page: 1 }));
+      prevFiltersRef.current = { debouncedSearch, priority, status };
+    }
+
+    fetchTodos({ append: pendingAppendRef.current, page: currentPage });
     pendingAppendRef.current = false;
-  }, [fetchTodos]);
+  }, [fetchTodos, debouncedSearch, priority, status, pagination.page]);
 
   const loadMore = useCallback(() => {
     if (isLoading || isFetchingRef.current) return;
@@ -70,10 +95,6 @@ export function useTodos() {
       setPagination((prev) => ({ ...prev, page: prev.page + 1 }));
     }
   }, [isLoading, pagination.page, paginationMeta.total_pages]);
-
-  useEffect(() => {
-    setPagination((prev) => ({ ...prev, page: 1 }));
-  }, [debouncedSearch, priority, status]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -175,5 +196,6 @@ export function useTodos() {
     handleOptimisticTodoUpdateFailed,
     handleOptimisticTodoDeleted,
     handleOptimisticTodoDeleteFailed,
+    resetPaginationAndRefetch
   };
 }

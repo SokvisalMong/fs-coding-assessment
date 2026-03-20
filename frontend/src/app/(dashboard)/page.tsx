@@ -82,6 +82,7 @@ export default function Home() {
     handleOptimisticTodoUpdateFailed,
     handleOptimisticTodoDeleted,
     handleOptimisticTodoDeleteFailed,
+    resetPaginationAndRefetch,
   } = useTodos();
 
   const {
@@ -227,7 +228,14 @@ export default function Home() {
 
           {/* View */}
           <div className="flex w-full sm:w-auto mt-4 sm:mt-0 justify-end md:justify-start">
-            <Tabs value={view} onValueChange={(value) => setView(value as "table" | "list")} className="w-full sm:w-auto">
+            <Tabs 
+              value={view} 
+              onValueChange={(value) => {
+                setView(value as "table" | "list");
+                resetPaginationAndRefetch();
+              }} 
+              className="w-full sm:w-auto"
+            >
               <TabsList className="grid w-full grid-cols-2 sm:inline-flex">
                 <TabsTrigger value="table">
                   <TableIcon/>
@@ -242,7 +250,7 @@ export default function Home() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className={`overflow-y-auto flex flex-col gap-2 ${view === "table" ? "h-[40vh]" : "h-[50vh]"}`}>
+      <CardContent className={`flex flex-col gap-2 ${view === "table" ? "h-[40vh] overflow-hidden" : "h-[50vh] overflow-y-auto overscroll-contain"}`}>
         {view === "table" && (
           <TodosTable todos={todos} onViewTodo={openViewDialog} onDeleteTodo={openDeleteDialog} onUpdateStatus={handleUpdateTodoStatus} />
         )}
