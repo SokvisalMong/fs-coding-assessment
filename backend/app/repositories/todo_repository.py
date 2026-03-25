@@ -51,10 +51,9 @@ class TodoRepository:
         summary_query = select(
             func.count(Todo.id),
             func.sum(case((Todo.status == TodoStatus.COMPLETED, 1), else_=0)),
-            func.sum(case((Todo.status == TodoStatus.IN_PROGRESS, 1), else_=0)),
         ).where(Todo.owner_id == owner_id)
         summary_result = await self.session.execute(summary_query)
-        total, completed, pending = summary_result.one()
+        total, completed = summary_result.one()
 
         priority_query = (
             select(Todo.priority, func.count(Todo.id))
@@ -65,5 +64,5 @@ class TodoRepository:
         priority_result = await self.session.execute(priority_query)
         by_priority = {priority: count for priority, count in priority_result.all()}
 
-        return int(total or 0), int(completed or 0), int(pending or 0), by_priority
+        return int(total or 0), int(completed or 0), int((total or 0) - (completed or 0)), by_priority
 

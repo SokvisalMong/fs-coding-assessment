@@ -6,7 +6,7 @@ import { MagnifyingGlassIcon, CircleNotchIcon, TableIcon, ListIcon } from "@phos
 import { STATUS } from "@/enums/status.enum";
 import { PRIORITY } from "@/enums/priority.enum";
 import { Todo } from "@/models/todo.model";
-import { deleteTodo, updateTodo } from "@/actions/todo";
+import { deleteTodo, completeTodo } from "@/actions/todo";
 import { toast } from "sonner";
 import { 
   Tabs,
@@ -117,23 +117,23 @@ export default function Home() {
   }, [fetchTodos]);
 
   const handleUpdateTodoStatus = useCallback(async (todo: Todo) => {
-    let newStatus: STATUS;
-    if (todo.status === STATUS.IN_PROGRESS) {
-      newStatus = STATUS.COMPLETED;
-    } else if (todo.status === STATUS.COMPLETED) {
-      newStatus = STATUS.IN_PROGRESS;
+    let nextStatus: STATUS;
+    if (todo.status === STATUS.NOT_STARTED) {
+      nextStatus = STATUS.IN_PROGRESS;
+    } else if (todo.status === STATUS.IN_PROGRESS) {
+      nextStatus = STATUS.COMPLETED;
     } else {
-      newStatus = STATUS.IN_PROGRESS;
+      nextStatus = STATUS.NOT_STARTED;
     }
 
-    const nextTodo = { ...todo, status: newStatus };
+    const nextTodo = { ...todo, status: nextStatus };
     const loadingToastId = toast.loading("Updating status...");
     
     // Optimistic update
     handleOptimisticTodoUpdated(nextTodo);
     
     try {
-      await updateTodo(todo.id, { status: newStatus });
+      await completeTodo(todo.id);
       toast.success("Status updated successfully", {
         id: loadingToastId,
       });
